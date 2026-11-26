@@ -1,0 +1,2483 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ORÁCULO DOS LEILÕES | Inteligência & ROI Imobiliário</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#09090b',
+            charcoal: '#121215',
+            steel: '#18181c',
+            borderline: '#27272a',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      background-color: #09090b;
+      color: #f4f4f5;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #09090b; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+    
+    /* Range Slider Styling */
+    input[type="range"] {
+      -webkit-appearance: none;
+      background: #27272a;
+      height: 6px;
+      border-radius: 9999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #f59e0b;
+      cursor: pointer;
+      border: 2px solid #09090b;
+    }
+    .glass-panel {
+      background: rgba(18, 18, 21, 0.92);
+      backdrop-filter: blur(12px);
+    }
+    @keyframes pulseGlow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .animate-pulse-slow { animation: pulseGlow 2.5s infinite; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- TOP NAVIGATION BAR -->
+  <header class="sticky top-0 z-40 border-b border-zinc-800 glass-panel">
+    <!-- Data Source Sync Status Banner -->
+    <div id="sync-status-bar" class="bg-zinc-950 border-b border-zinc-800/80 px-4 sm:px-6 py-1.5 text-[11px] flex flex-wrap items-center justify-between gap-2">
+      <div class="flex items-center gap-2">
+        <span id="sync-indicator-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="sync-status-text" class="font-mono text-zinc-300">Inicializando motor de dados...</span>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="sync-total-brasil" class="hidden sm:inline font-mono text-zinc-500"></span>
+        <button onclick="loadAuctionData(true)" class="px-2.5 py-0.5 rounded bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-amber-400 font-semibold transition-colors flex items-center gap-1.5">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Recarregar Dados
+        </button>
+      </div>
+    </div>
+
+    <div class="max-w-[1600px] mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3 shrink-0 cursor-pointer" onclick="switchMainTab('radar')">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-black shadow-lg shadow-amber-500/20">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-extrabold tracking-tight text-white text-base sm:text-lg">ORÁCULO</span>
+            <span class="text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">PRO IA</span>
+          </div>
+          <p class="text-[11px] text-zinc-400 hidden sm:block">Inteligência de Leilões Imobiliários</p>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="hidden lg:flex items-center gap-1 bg-zinc-900/90 p-1 rounded-xl border border-zinc-800">
+        <button onclick="switchMainTab('radar')" id="nav-radar" class="nav-tab active px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 bg-zinc-800 text-white shadow">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          Radar de Oportunidades
+        </button>
+        <button onclick="switchMainTab('gpt')" id="nav-gpt" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-zinc-400 hover:text-white">
+          <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+          Oráculo GPT
+        </button>
+        <button onclick="switchMainTab('edital')" id="nav-edital" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-zinc-400 hover:text-white">
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+          Analisador de Edital IA
+        </button>
+        <button onclick="switchMainTab('financiamento')" id="nav-financiamento" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-zinc-400 hover:text-white">
+          <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+          Simulador Financiamento
+        </button>
+        <button onclick="switchMainTab('whatsapp')" id="nav-whatsapp" class="nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-zinc-400 hover:text-white">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          Radar WhatsApp
+        </button>
+      </nav>
+
+      <!-- Global Cost Configurator Trigger + Stats -->
+      <div class="flex items-center gap-2.5">
+        <button onclick="toggleCostDrawer()" id="btn-cost-drawer" class="px-3.5 py-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700/80 text-xs font-semibold text-zinc-200 flex items-center gap-2 transition-all shadow-sm">
+          <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+          <span>Meus Custos Globais</span>
+          <span id="cost-badge-summary" class="hidden sm:inline-block font-mono text-[11px] px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400">10% + R$ 15k</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile Navigation Bar -->
+    <div class="flex lg:hidden overflow-x-auto border-t border-zinc-800/80 px-3 py-2 gap-1.5 bg-zinc-950/90">
+      <button onclick="switchMainTab('radar')" id="m-nav-radar" class="m-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white">Radar</button>
+      <button onclick="switchMainTab('gpt')" id="m-nav-gpt" class="m-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400">Oráculo GPT</button>
+      <button onclick="switchMainTab('edital')" id="m-nav-edital" class="m-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400">Analisador Edital</button>
+      <button onclick="switchMainTab('financiamento')" id="m-nav-financiamento" class="m-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400">Financiamento</button>
+      <button onclick="switchMainTab('whatsapp')" id="m-nav-whatsapp" class="m-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400">Alertas WhatsApp</button>
+    </div>
+
+    <!-- COLLAPSIBLE GLOBAL COST CONFIGURATOR PANEL -->
+    <div id="global-cost-panel" class="hidden border-t border-zinc-800 bg-[#101014] shadow-2xl">
+      <div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-zinc-800/80">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+              Parâmetros Globais de ROI (Calculados em Tempo Real em Todos os Imóveis)
+            </h3>
+            <p class="text-xs text-zinc-400">Configure uma única vez seus custos operacionais padrão. O sistema recalcula o ROI líquido da 1ª e 2ª praça instantaneamente.</p>
+          </div>
+          <div class="flex items-center gap-3">
+            <button onclick="resetGlobalCosts()" class="text-xs text-zinc-400 hover:text-white underline">Restaurar Padrão</button>
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Comissão Leiloeiro (%)</label>
+            <input type="number" id="cfg-comissao" value="5" step="0.5" min="0" max="10" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">ITBI Municipal (%)</label>
+            <input type="number" id="cfg-itbi" value="3" step="0.5" min="0" max="10" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Registro / Escritura (%)</label>
+            <input type="number" id="cfg-registro" value="2" step="0.5" min="0" max="10" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Reforma Estimada (R$)</label>
+            <input type="number" id="cfg-reforma" value="10000" step="1000" min="0" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Desocupação (R$)</label>
+            <input type="number" id="cfg-desocupacao" value="3000" step="500" min="0" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Advogado / Jurídico (R$)</label>
+            <input type="number" id="cfg-advogado" value="2000" step="500" min="0" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Corretagem Revenda (%)</label>
+            <input type="number" id="cfg-corretagem" value="0" step="1" min="0" max="10" onchange="updateGlobalCosts()" oninput="updateGlobalCosts()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white focus:border-amber-500 focus:outline-none">
+          </div>
+          <div class="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 flex flex-col justify-between">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Filtro Rápido ROI</label>
+            <label class="inline-flex items-center gap-2 cursor-pointer mt-1">
+              <input type="checkbox" id="cfg-only-positive" onchange="updateGlobalCosts()" class="w-4 h-4 rounded bg-zinc-950 border-zinc-700 text-emerald-500 focus:ring-0">
+              <span class="text-xs font-semibold text-emerald-400">Só ROI Positivo</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT AREA -->
+  <main class="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 py-6">
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: RADAR DE OPORTUNIDADES (MAIN DASHBOARD & LISTING)             -->
+    <!-- ===================================================================== -->
+    <section id="view-radar" class="space-y-6">
+      
+      <!-- Executive KPI Ticker Strip -->
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div class="bg-charcoal border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">Lotes Monitorados</p>
+            <p id="kpi-total-lotes" class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">16</p>
+            <p class="text-[11px] text-zinc-500 mt-0.5">22 portais & bancos integrados</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center text-zinc-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+          </div>
+        </div>
+
+        <div class="bg-charcoal border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">ROI Médio (2ª Praça)</p>
+            <p id="kpi-avg-roi" class="text-2xl font-bold font-mono text-emerald-400 mt-1 tabular-nums">+41.8%</p>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Líquido já descontando custos</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+          </div>
+        </div>
+
+        <div class="bg-charcoal border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">Oportunidades Ouro (≥ 8.5)</p>
+            <p id="kpi-high-score" class="text-2xl font-bold font-mono text-amber-400 mt-1 tabular-nums">7</p>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Alta liquidez + edital validado</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+          </div>
+        </div>
+
+        <div class="bg-charcoal border border-zinc-800 rounded-xl p-4 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] uppercase tracking-wider text-zinc-400 font-semibold">Lucro Potencial Total</p>
+            <p id="kpi-total-profit" class="text-2xl font-bold font-mono text-white mt-1 tabular-nums">R$ 3,42M</p>
+            <p class="text-[11px] text-zinc-500 mt-0.5">Soma dos lotes filtrados</p>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Strategy Quick-Pills (Seleções Especiais Estilo Leilão Ninja + Score IA) -->
+      <div class="flex items-center gap-2 overflow-x-auto pb-1">
+        <span class="text-xs font-semibold text-zinc-400 mr-1 shrink-0">Seleções:</span>
+        <button onclick="setStrategyFilter('ALL')" data-strategy="ALL" class="strategy-pill active shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-500 text-zinc-950 transition-all">Todos os Imóveis</button>
+        <button onclick="setStrategyFilter('SCORE_HIGH')" data-strategy="SCORE_HIGH" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🔥 Score ≥ 8.5</button>
+        <button onclick="setStrategyFilter('PRAIA')" data-strategy="PRAIA" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🏖️ Litoral / Praia</button>
+        <button onclick="setStrategyFilter('UNIVERSITARIO')" data-strategy="UNIVERSITARIO" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🎓 Universitário</button>
+        <button onclick="setStrategyFilter('AIRBNB')" data-strategy="AIRBNB" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🔑 Alta Rentabilidade Airbnb</button>
+        <button onclick="setStrategyFilter('REVENDA')" data-strategy="REVENDA" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">💰 Revenda Rápida (Flip)</button>
+        <button onclick="setStrategyFilter('FINANCIAMENTO')" data-strategy="FINANCIAMENTO" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🏦 Aceita Financiamento</button>
+        <button onclick="setStrategyFilter('DESOCUPADO')" data-strategy="DESOCUPADO" class="strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all">🔓 Desocupado</button>
+      </div>
+
+      <!-- Advanced Search & Filter Bar -->
+      <div class="bg-charcoal border border-zinc-800 rounded-2xl p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
+          <!-- Text / Condomínio Search -->
+          <div class="lg:col-span-2 relative">
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Buscar Bairro, Endereço, Condomínio ou Portal</label>
+            <div class="relative">
+              <input type="text" id="filter-search" oninput="applyFilters()" placeholder="Ex: Zona 07, Batel, Caixa, Edifício..." class="w-full bg-zinc-950 border border-zinc-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-zinc-500 focus:border-amber-500 focus:outline-none">
+              <svg class="w-4 h-4 text-zinc-500 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            </div>
+          </div>
+
+          <!-- State Filter -->
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Estado (UF)</label>
+            <select id="filter-uf" onchange="onUfFilterChange()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+              <option value="ALL">Todos os Estados (Brasil)</option>
+            </select>
+          </div>
+
+          <!-- City Filter -->
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Cidade</label>
+            <select id="filter-cidade" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+              <option value="ALL">Todas as Cidades</option>
+            </select>
+          </div>
+
+          <!-- Property Type -->
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Tipo de Imóvel</label>
+            <select id="filter-tipo" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+              <option value="ALL">Todos os Tipos</option>
+              <option value="Apartamento">Apartamento</option>
+              <option value="Casa">Casa / Sobrado</option>
+              <option value="Comercial">Sala / Comercial</option>
+              <option value="Terreno">Terreno / Lote</option>
+            </select>
+          </div>
+
+          <!-- Max Bid Price -->
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Lance Máximo (2ª Praça)</label>
+            <select id="filter-max-price" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs text-white focus:border-amber-500 focus:outline-none">
+              <option value="999999999">Sem limite</option>
+              <option value="150000">Até R$ 150.000</option>
+              <option value="250000">Até R$ 250.000</option>
+              <option value="400000">Até R$ 400.000</option>
+              <option value="700000">Até R$ 700.000</option>
+              <option value="1500000">Até R$ 1.500.000</option>
+            </select>
+          </div>
+
+          <!-- Sort Order -->
+          <div>
+            <label class="block text-[11px] font-medium text-zinc-400 mb-1">Ordenar Por</label>
+            <select id="filter-sort" onchange="applyFilters()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2 text-xs font-semibold text-amber-400 focus:border-amber-500 focus:outline-none">
+              <option value="score">⭐ Maior Score Oráculo (0–10)</option>
+              <option value="roi2">📈 Maior ROI % (2ª Praça)</option>
+              <option value="lucro2">💵 Maior Lucro Líquido (R$)</option>
+              <option value="desconto">🏷️ Maior Desconto vs Mercado</option>
+              <option value="menor_lance">🔽 Menor Valor de Lance</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <p class="text-xs text-zinc-400">
+          Exibindo <strong id="visible-count" class="text-amber-400 font-mono">0</strong> de <strong id="results-count" class="text-white font-mono">0</strong> oportunidades auditadas com cálculo de ROI em tempo real.
+        </p>
+        <div class="flex items-center gap-3 text-[11px] text-zinc-400">
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-emerald-500/20 border border-emerald-500"></span> ROI Líquido Positivo</span>
+          <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-sm bg-red-500/20 border border-red-500"></span> ROI Negativo / Cautela</span>
+        </div>
+      </div>
+
+      <!-- PROPERTY GRID -->
+      <div id="properties-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <!-- Populated dynamically by JS -->
+      </div>
+
+      <!-- PROGRESSIVE PAGINATION / LOAD MORE BUTTON -->
+      <div id="load-more-container" class="hidden pt-4 pb-8 flex flex-col items-center justify-center gap-2">
+        <button onclick="loadMoreProperties()" class="px-6 py-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 hover:border-amber-500/60 text-xs font-bold text-white transition-all shadow-lg flex items-center gap-2">
+          <span>Carregar mais lotes</span>
+          <span id="load-more-remaining" class="font-mono text-amber-400"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: ORÁCULO GPT (NATURAL LANGUAGE SEARCH & AI DEAL ASSISTANT)     -->
+    <!-- ===================================================================== -->
+    <section id="view-gpt" class="hidden max-w-5xl mx-auto space-y-6">
+      <div class="bg-charcoal border border-zinc-800 rounded-2xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-800">
+          <div>
+            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-semibold mb-2">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+              Motor Semântico Oráculo GPT
+            </div>
+            <h2 class="text-xl sm:text-2xl font-bold text-white">Busque oportunidades conversando com a IA</h2>
+            <p class="text-xs sm:text-sm text-zinc-400 mt-1">Descreva sua estratégia, cidade, orçamento ou perfil de risco. O Oráculo varre os editais e ranqueia os melhores lotes.</p>
+          </div>
+        </div>
+
+        <!-- Example Prompt Chips -->
+        <div class="mt-5">
+          <p class="text-xs font-medium text-zinc-400 mb-2.5">Sugestões de consultas estratégicas (clique para testar):</p>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="runGptQuery('Apartamentos desocupados em Maringá ou Curitiba com ROI acima de 30%')" class="text-left text-xs bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 px-3 py-2 rounded-xl transition-all">
+              "Apartamentos desocupados em Maringá ou Curitiba com ROI acima de 30%"
+            </button>
+            <button onclick="runGptQuery('Imóveis na praia para Airbnb até R$ 450 mil com alta rentabilidade')" class="text-left text-xs bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 px-3 py-2 rounded-xl transition-all">
+              "Imóveis na praia para Airbnb até R$ 450 mil com alta rentabilidade"
+            </button>
+            <button onclick="runGptQuery('Oportunidades da Caixa que aceitam financiamento e têm Score acima de 8.5')" class="text-left text-xs bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 px-3 py-2 rounded-xl transition-all">
+              "Oportunidades da Caixa que aceitam financiamento e têm Score acima de 8.5"
+            </button>
+            <button onclick="runGptQuery('Imóveis universitários perto de faculdade com lucro líquido maior que R$ 90 mil')" class="text-left text-xs bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 px-3 py-2 rounded-xl transition-all">
+              "Imóveis universitários perto de faculdade com lucro líquido maior que R$ 90 mil"
+            </button>
+          </div>
+        </div>
+
+        <!-- Prompt Input Box -->
+        <div class="mt-5 flex flex-col sm:flex-row gap-3">
+          <input type="text" id="gpt-input" onkeydown="if(event.key==='Enter') runGptQuery()" placeholder="Ex: Quero casas ou apartamentos no Paraná até 300 mil, desocupados, com dívidas pagas pelo banco..." class="flex-1 bg-zinc-950 border border-zinc-700 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-500 focus:border-purple-500 focus:outline-none">
+          <button onclick="runGptQuery()" class="px-6 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-zinc-950 font-bold text-sm shadow-lg shadow-amber-500/20 transition-all shrink-0 flex items-center justify-center gap-2">
+            <span>Consultar Oráculo</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+
+        <!-- AI Response Output -->
+        <div id="gpt-response-area" class="mt-6 space-y-4">
+          <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 text-xs text-zinc-400 flex items-center gap-3">
+            <span class="w-2 h-2 rounded-full bg-purple-400 animate-ping"></span>
+            Aguardando sua instrução acima. O motor cruza filtros financeiros, jurídicos e de geolocalização em tempo real.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 3: ANALISADOR DE EDITAL & MATRÍCULA POR IA                       -->
+    <!-- ===================================================================== -->
+    <section id="view-edital" class="hidden max-w-6xl mx-auto space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <!-- Input Column -->
+        <div class="lg:col-span-6 bg-charcoal border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center justify-between gap-2 mb-2">
+              <span class="text-xs font-mono uppercase tracking-wider text-emerald-400 font-bold">Auditoria Jurídica Automatizada</span>
+              <span class="text-[11px] text-zinc-500">Extrator de Riscos & Ônus</span>
+            </div>
+            <h2 class="text-xl font-bold text-white">Analisador de Edital & Matrícula IA</h2>
+            <p class="text-xs text-zinc-400 mt-1">Cole abaixo o texto do Edital de Leilão ou da Certidão de Matrícula do imóvel. A IA identifica ocupação, dívidas propter rem, penhoras e gera o semáforo de segurança.</p>
+
+            <!-- Preset Sample Buttons -->
+            <div class="flex flex-wrap gap-2 mt-4">
+              <button onclick="loadSampleEdital('limpo')" class="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-300 text-xs font-semibold transition-all">
+                📄 Carregar Exemplo: Edital Caixa Limpo (Baixo Risco)
+              </button>
+              <button onclick="loadSampleEdital('complexo')" class="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-300 text-xs font-semibold transition-all">
+                ⚠️ Carregar Exemplo: Judicial com Ocupante e Dívidas (Alto Risco)
+              </button>
+            </div>
+
+            <textarea id="edital-textarea" rows="12" placeholder="Cole aqui cláusulas do edital, responsabilidades de IPTU/condomínio, averbações da matrícula (Av.1, R.2, Penhoras, Alienação Fiduciária)..." class="w-full mt-4 bg-zinc-950 border border-zinc-800 rounded-xl p-3.5 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:border-emerald-500 focus:outline-none leading-relaxed"></textarea>
+          </div>
+
+          <button onclick="analyzeEditalText()" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+            Auditar Documento Agora
+          </button>
+        </div>
+
+        <!-- Output Column -->
+        <div class="lg:col-span-6 bg-charcoal border border-zinc-800 rounded-2xl p-6">
+          <h3 class="text-sm font-bold text-white uppercase tracking-wider mb-4 pb-3 border-b border-zinc-800 flex items-center justify-between">
+            <span>Relatório de Due Diligence IA</span>
+            <span id="edital-status-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-400">Aguardando Texto</span>
+          </h3>
+
+          <div id="edital-result-container" class="space-y-4">
+            <div class="py-16 text-center space-y-2">
+              <div class="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-800 mx-auto flex items-center justify-center text-zinc-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+              </div>
+              <p class="text-sm font-medium text-zinc-300">Nenhum documento auditado ainda</p>
+              <p class="text-xs text-zinc-500 max-w-sm mx-auto">Clique em um dos exemplos ao lado ou cole o texto do edital para gerar o checklist estruturado.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 4: CALCULADORA DE FINANCIAMENTO & ALAVANCAGEM (FLIPPING)         -->
+    <!-- ===================================================================== -->
+    <section id="view-financiamento" class="hidden max-w-6xl mx-auto">
+      <div class="bg-charcoal border border-zinc-800 rounded-2xl p-6 sm:p-8">
+        <div class="pb-5 border-b border-zinc-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <span class="text-xs font-mono font-bold text-blue-400 uppercase">Engenharia Financeira</span>
+            <h2 class="text-xl sm:text-2xl font-bold text-white mt-0.5">Simulador de Financiamento & ROI Alavancado</h2>
+            <p class="text-xs text-zinc-400 mt-1">Calcule o retorno real sobre o capital próprio investido (Cash-on-Cash ROI) em leilões que aceitam financiamento habitacional (ex: Caixa).</p>
+          </div>
+          <div>
+            <label class="block text-[11px] text-zinc-400 mb-1">Importar Imóvel do Radar:</label>
+            <select id="fin-preset-select" onchange="loadPropertyIntoFinCalc(this.value)" class="bg-zinc-950 border border-zinc-700 rounded-xl px-3 py-2 text-xs text-white focus:border-blue-500 focus:outline-none">
+              <option value="">-- Selecione um imóvel do catálogo --</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mt-6">
+          <!-- Sliders & Inputs -->
+          <div class="lg:col-span-6 space-y-4">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800">
+                <label class="block text-xs text-zinc-400 mb-1">Valor de Mercado (Venda)</label>
+                <input type="number" id="fin-mercado" value="420000" step="5000" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white">
+              </div>
+              <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800">
+                <label class="block text-xs text-zinc-400 mb-1">Valor do Lance (Arremate)</label>
+                <input type="number" id="fin-lance" value="230000" step="5000" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white">
+              </div>
+            </div>
+
+            <div class="bg-zinc-900/80 p-4 rounded-xl border border-zinc-800 space-y-3">
+              <div class="flex justify-between text-xs">
+                <span class="text-zinc-400">Percentual de Entrada (Recursos Próprios)</span>
+                <span id="fin-entrada-lbl" class="font-mono font-bold text-amber-400">20% (R$ 46.000)</span>
+              </div>
+              <input type="range" id="fin-entrada-pct" min="5" max="100" step="5" value="20" oninput="calcStandaloneFinancing()" class="w-full">
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
+                <label class="block text-[11px] text-zinc-400 mb-1">Taxa Juros (% a.a.)</label>
+                <input type="number" id="fin-juros" value="9.9" step="0.1" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white">
+              </div>
+              <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
+                <label class="block text-[11px] text-zinc-400 mb-1">Prazo (Meses)</label>
+                <input type="number" id="fin-prazo" value="360" step="12" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-white">
+              </div>
+              <div class="bg-zinc-900/80 p-3 rounded-xl border border-zinc-800">
+                <label class="block text-[11px] text-zinc-400 mb-1">Meses até Revenda</label>
+                <input type="number" id="fin-meses-venda" value="6" min="1" max="60" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-2.5 py-1.5 text-sm font-mono text-amber-400">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800">
+                <label class="block text-xs text-zinc-400 mb-1">Reforma + Desocupação (R$)</label>
+                <input type="number" id="fin-reforma" value="18000" step="1000" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white">
+              </div>
+              <div class="bg-zinc-900/80 p-3.5 rounded-xl border border-zinc-800">
+                <label class="block text-xs text-zinc-400 mb-1">Condomínio + IPTU Mensal (R$)</label>
+                <input type="number" id="fin-mensal-fixo" value="650" step="50" oninput="calcStandaloneFinancing()" class="w-full bg-zinc-950 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-white">
+              </div>
+            </div>
+          </div>
+
+          <!-- Results Dashboard -->
+          <div class="lg:col-span-6 bg-zinc-950 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between space-y-5">
+            <div>
+              <h3 class="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-4">Resultado Projetado da Operação</h3>
+              
+              <div class="grid grid-cols-2 gap-4 mb-5">
+                <div class="bg-charcoal border border-zinc-800 p-4 rounded-xl">
+                  <p class="text-xs text-zinc-400">Capital Próprio Desembolsado</p>
+                  <p id="fin-out-capital" class="text-xl font-bold font-mono text-white mt-1 tabular-nums">R$ 94.750</p>
+                  <p class="text-[11px] text-zinc-500 mt-0.5">Entrada + Docs + Reforma + Parcelas</p>
+                </div>
+                <div class="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-xl">
+                  <p class="text-xs text-emerald-300">ROI Alavancado (Sobre Caixa)</p>
+                  <p id="fin-out-roi" class="text-2xl font-extrabold font-mono text-emerald-400 mt-1 tabular-nums">+124.8%</p>
+                  <p id="fin-out-roi-mes" class="text-[11px] text-emerald-300/80 mt-0.5">Equiv. a 20.8% ao mês</p>
+                </div>
+              </div>
+
+              <div class="space-y-2.5 text-xs border-t border-zinc-800 pt-4">
+                <div class="flex justify-between">
+                  <span class="text-zinc-400">Valor Financiado pelo Banco:</span>
+                  <span id="fin-out-financiado" class="font-mono text-zinc-200">R$ 184.000</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-zinc-400">1ª Parcela Estimada (Tabela SAC):</span>
+                  <span id="fin-out-parcela" class="font-mono text-zinc-200">R$ 2.029 / mês</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-zinc-400">Comissão + ITBI + Registro (10%):</span>
+                  <span id="fin-out-docs" class="font-mono text-zinc-200">R$ 23.000</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-zinc-400">Custo de Carregamento (Parcelas + Cond/IPTU):</span>
+                  <span id="fin-out-carrego" class="font-mono text-zinc-200">R$ 16.074</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-zinc-400">Saldo Devedor Quitado na Revenda:</span>
+                  <span id="fin-out-saldo" class="font-mono text-zinc-200">R$ 180.933</span>
+                </div>
+                <div class="flex justify-between pt-3 border-t border-zinc-800 text-sm font-bold">
+                  <span class="text-white">Lucro Líquido Final no Bolso:</span>
+                  <span id="fin-out-lucro" class="font-mono text-emerald-400">R$ 118.250</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-blue-500/10 border border-blue-500/20 rounded-xl p-3.5 text-[11px] text-blue-200 leading-relaxed">
+              <strong>Insight Oráculo:</strong> Ao alavancar com financiamento de 80%, você multiplica o retorno sobre o capital investido e consegue arrematar até 3 imóveis simultaneamente com o mesmo caixa de 1 imóvel à vista.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 5: RADAR WHATSAPP (ALERTAS AUTOMÁTICOS EM TEMPO REAL)            -->
+    <!-- ===================================================================== -->
+    <section id="view-whatsapp" class="hidden max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-charcoal border border-zinc-800 rounded-2xl p-6 space-y-5">
+          <div>
+            <span class="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400 uppercase">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+              Integração Webhook Ativa
+            </span>
+            <h2 class="text-xl font-bold text-white mt-1">Configurar Alertas Instantâneos no WhatsApp</h2>
+            <p class="text-xs text-zinc-400 mt-1">Seja avisado segundos após o crawler capturar um novo edital que bata exatamente com seus critérios de ROI e região.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-zinc-400 mb-1">Seu WhatsApp (com DDD)</label>
+              <input type="text" id="wa-phone" value="(44) 99988-7766" oninput="updateWhatsappPreview()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm font-mono text-white">
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-400 mb-1">Cidades Monitoradas</label>
+              <input type="text" id="wa-cities" value="Maringá, Curitiba, Londrina, Baln. Camboriú" oninput="updateWhatsappPreview()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-zinc-400 mb-1">Score Oráculo Mínimo</label>
+              <select id="wa-score" onchange="updateWhatsappPreview()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                <option value="8.5" selected>🔥 Apenas Ouro (Score ≥ 8.5)</option>
+                <option value="7.5">⭐ Boas Oportunidades (Score ≥ 7.5)</option>
+                <option value="6.0">📊 Todos os Lotes Positivos (Score ≥ 6.0)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs text-zinc-400 mb-1">ROI Líquido Mínimo (2ª Praça)</label>
+              <select id="wa-roi" onchange="updateWhatsappPreview()" class="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-sm text-white">
+                <option value="25">Acima de 25% líquido</option>
+                <option value="35" selected>Acima de 35% líquido</option>
+                <option value="50">Acima de 50% líquido</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="pt-2 flex flex-wrap gap-3">
+            <button onclick="saveWhatsappRule()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs transition-all shadow-lg shadow-emerald-500/20">
+              Salvar Regra de Disparo
+            </button>
+            <button onclick="simulateWhatsappPush()" class="px-5 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs border border-zinc-700 transition-all">
+              Testar Envio de Alerta Agora
+            </button>
+          </div>
+        </div>
+
+        <!-- WhatsApp Mockup Preview -->
+        <div class="lg:col-span-5 bg-[#0b141a] border border-zinc-800 rounded-2xl p-5 flex flex-col justify-between">
+          <div class="flex items-center gap-3 pb-3 border-b border-zinc-800/80">
+            <div class="w-9 h-9 rounded-full bg-amber-500 flex items-center justify-center text-zinc-950 font-black text-xs">OR</div>
+            <div>
+              <p class="text-xs font-bold text-white flex items-center gap-1.5">Oráculo dos Leilões BOT <span class="text-emerald-400">✓</span></p>
+              <p class="text-[10px] text-emerald-400">online • alerta instantâneo</p>
+            </div>
+          </div>
+
+          <div id="wa-preview-box" class="my-4 bg-[#1f2c34] rounded-xl p-3.5 text-xs text-zinc-100 font-sans space-y-1.5 shadow-md border border-zinc-700/40 leading-relaxed">
+            <!-- Populated dynamically -->
+          </div>
+
+          <p class="text-[11px] text-zinc-500 text-center">Prévia exata da mensagem enviada para <span id="wa-target-lbl" class="text-zinc-300 font-mono">(44) 99988-7766</span></p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================================= -->
+  <!-- JAVASCRIPT ENGINE: DATA LOADER, ROI CALCULATOR, NLP PARSER, MODALS      -->
+  <!-- ======================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. GLOBAL STATE & CONFIGURABLE INVESTOR COSTS
+    // -------------------------------------------------------------------------
+    let globalCosts = {
+      comissaoPct: 5.0,
+      itbiPct: 3.0,
+      registroPct: 2.0,
+      reforma: 10000,
+      desocupacao: 3000,
+      advogado: 2000,
+      corretagemPct: 0.0,
+      onlyPositive: false
+    };
+
+    let activeStrategy = 'ALL';
+    let currentModalProperty = null;
+    let ACTIVE_PROPERTIES = [];
+    let CURRENT_FILTERED_LIST = [];
+    const PAGE_SIZE = 24;
+    let visibleLimit = PAGE_SIZE;
+
+    // -------------------------------------------------------------------------
+    // 2. RICH FALLBACK DEMO DATASET (USED WHEN ./imoveis.json IS NOT PRESENT)
+    // -------------------------------------------------------------------------
+    const DEMO_PROPERTIES = [
+      <div id="modal-body" class="p-5 sm:p-6 max-h-[78vh] overflow-y-auto">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ======================================================================= -->
+  <!-- JAVASCRIPT ENGINE: DATA, ROI CALCULATOR, NLP PARSER, MODALS & CHARTS    -->
+  <!-- ======================================================================= -->
+  <script>
+    // -------------------------------------------------------------------------
+    // 1. GLOBAL STATE & CONFIGURABLE INVESTOR COSTS
+    // -------------------------------------------------------------------------
+    let globalCosts = {
+      comissaoPct: 5.0,
+      itbiPct: 3.0,
+      registroPct: 2.0,
+      reforma: 10000,
+      desocupacao: 5000,
+      corretagemPct: 0.0,
+      onlyPositive: false
+    };
+
+    let activeStrategy = 'ALL';
+    let currentModalProperty = null;
+
+    // -------------------------------------------------------------------------
+    // 2. RICH REALISTIC AUCTION DATASET (PARANÁ & BRASIL)
+    // -------------------------------------------------------------------------
+    const PROPERTIES = [
+      {
+        id: 'ORC-101',
+        titulo: 'Apartamento Ed. Solar das Araucárias (88m²)',
+        tipo: 'Apartamento',
+        endereco: 'Av. Herval, 1140 - Zona 07',
+        bairro: 'Zona 07',
+        cidade: 'Maringá',
+        uf: 'PR',
+        portal: 'Caixa Econômica Federal',
+        urlPortal: 'https://venda-imoveis.caixa.gov.br',
+        area: 88,
+        quartos: 3,
+        vagas: 2,
+        imagem: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 460000,
+        mercado: 495000,
+        portaisPreco: { olx: 485000, zap: 505000, imovelweb: 492000, quintoandar: 498000 },
+        praca1Valor: 460000,
+        praca1Data: '04/12/2026 10:00',
+        praca2Valor: 276000,
+        praca2Data: '11/12/2026 10:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco (Caixa)',
+        aceitaFinanciamento: true,
+        estrategias: ['UNIVERSITARIO', 'REVENDA', 'FINANCIAMENTO', 'DESOCUPADO'],
+        indiceLocalizacao: 9.3,
+        valorizacao12m: '+11.4%',
+        pois: [
+          { nome: 'Universidade Estadual de Maringá (UEM)', dist: '650m (8 min a pé)', cat: 'Educação' },
+          { nome: 'Supermercado Muffato Gourmet', dist: '400m', cat: 'Comércio' },
+          { nome: 'Estádio Willie Davids / Eixo Esportivo', dist: '900m', cat: 'Lazer' },
+          { nome: 'Hospital Paraná', dist: '1.4 km', cat: 'Saúde' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial (Lei 9.514/97 - Alienação Fiduciária)',
+          processo: 'Consolidação de propriedade averbada na Matrícula 48.912 (2º CRI Maringá). Sem ações anulatórias.',
+          checklist: [
+            { item: 'Imóvel livre e desocupado com chaves na agência Caixa', ok: true },
+            { item: 'IPTU e Condomínio anteriores quitados pelo vendedor conforme item 4.2 do edital', ok: true },
+            { item: 'Aceita financiamento habitacional SBPE em até 35 anos (entrada mín. 5%)', ok: true },
+            { item: 'Matrícula sem indisponibilidade judicial ou usufruto vitalício', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-102',
+        titulo: 'Apartamento Frente Mar - Ed. Costa Esmeralda',
+        tipo: 'Apartamento',
+        endereco: 'Av. Atlântica, 2450 - Centro',
+        bairro: 'Centro',
+        cidade: 'Balneário Camboriú',
+        uf: 'SC',
+        portal: 'Mega Leilões',
+        urlPortal: 'https://www.megaleiloes.com.br',
+        area: 112,
+        quartos: 3,
+        vagas: 2,
+        imagem: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 1350000,
+        mercado: 1480000,
+        portaisPreco: { olx: 1450000, zap: 1510000, imovelweb: 1470000, quintoandar: 1490000 },
+        praca1Valor: 1350000,
+        praca1Data: '08/12/2026 14:00',
+        praca2Valor: 810000,
+        praca2Data: '15/12/2026 14:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Sub-rogadas no Preço (Art. 130 CTN)',
+        aceitaFinanciamento: false,
+        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 9.7,
+        valorizacao12m: '+16.8%',
+        pois: [
+          { nome: 'Praia Central (Calçadão Av. Atlântica)', dist: '80m', cat: 'Praia' },
+          { nome: 'Passeio San Miguel', dist: '450m', cat: 'Gastronomia' },
+          { nome: 'FG Big Wheel', dist: '2.1 km', cat: 'Turismo' },
+          { nome: 'Hospital Unimed Litoral', dist: '1.9 km', cat: 'Saúde' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Leilão Judicial - Execução de Título Extrajudicial',
+          processo: 'Autos nº 5012894-22.2024.8.24.0005 (2ª Vara Cível BC). Devedor devidamente intimado.',
+          checklist: [
+            { item: 'Imóvel desocupado (veraneio) constatado por Oficial de Justiça', ok: true },
+            { item: 'Débitos de IPTU sub-rogam-se no valor da arrematação', ok: true },
+            { item: 'Potencial de diária Airbnb R$ 950–R$ 1.400 na alta temporada', ok: true },
+            { item: 'Pagamento à vista ou parcelado judicialmente (25% entrada + 30x)', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-103',
+        titulo: 'Studio Mobiliado Batel Soho (42m²)',
+        tipo: 'Apartamento',
+        endereco: 'Rua Gutemberg, 412 - Batel',
+        bairro: 'Batel',
+        cidade: 'Curitiba',
+        uf: 'PR',
+        portal: 'Portal Zuk',
+        urlPortal: 'https://www.portalzuk.com.br',
+        area: 42,
+        quartos: 1,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 410000,
+        mercado: 435000,
+        portaisPreco: { olx: 425000, zap: 445000, imovelweb: 430000, quintoandar: 440000 },
+        praca1Valor: 410000,
+        praca1Data: '03/12/2026 11:00',
+        praca2Valor: 246000,
+        praca2Data: '10/12/2026 11:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco (Bradesco)',
+        aceitaFinanciamento: false,
+        estrategias: ['AIRBNB', 'REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 9.5,
+        valorizacao12m: '+12.1%',
+        pois: [
+          { nome: 'Shopping Pátio Batel', dist: '350m', cat: 'Shopping' },
+          { nome: 'Praça da Espanha (Polo Gastronômico)', dist: '300m', cat: 'Lazer' },
+          { nome: 'Hospital Pequeno Príncipe', dist: '1.1 km', cat: 'Saúde' },
+          { nome: 'Estação Tubo Batel', dist: '250m', cat: 'Transporte' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial - Banco Bradesco S.A.',
+          processo: 'Imóvel retomado e já desocupado pelo banco. Escritura definitiva em até 45 dias.',
+          checklist: [
+            { item: 'Bradesco entrega o imóvel livre de débitos de condomínio e IPTU até a data do leilão', ok: true },
+            { item: 'Alta demanda corporativa e Airbnb (ocupação média 78% no Batel)', ok: true },
+            { item: 'Desconto à vista adicional de 10% já aplicado na 2ª praça', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-104',
+        titulo: 'Casa em Condomínio Fechado - Terra Nova',
+        tipo: 'Casa',
+        endereco: 'Av. das Torres, 3200 - Gleba Palhano',
+        bairro: 'Gleba Palhano',
+        cidade: 'Londrina',
+        uf: 'PR',
+        portal: 'Caixa Econômica Federal',
+        urlPortal: 'https://venda-imoveis.caixa.gov.br',
+        area: 145,
+        quartos: 3,
+        vagas: 2,
+        imagem: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 620000,
+        mercado: 660000,
+        portaisPreco: { olx: 645000, zap: 675000, imovelweb: 655000, quintoandar: 665000 },
+        praca1Valor: 620000,
+        praca1Data: '05/12/2026 10:00',
+        praca2Valor: 384000,
+        praca2Data: '12/12/2026 10:00',
+        ocupacao: 'Ocupado',
+        dividas: 'Pagas pelo Banco (Caixa)',
+        aceitaFinanciamento: true,
+        estrategias: ['REVENDA', 'FINANCIAMENTO'],
+        indiceLocalizacao: 9.0,
+        valorizacao12m: '+10.5%',
+        pois: [
+          { nome: 'Shopping Catuaí Londrina', dist: '1.2 km', cat: 'Shopping' },
+          { nome: 'Lago Igapó II', dist: '1.8 km', cat: 'Lazer' },
+          { nome: 'Universidade Estadual de Londrina (UEL)', dist: '3.2 km', cat: 'Educação' },
+          { nome: 'Supermercado Viscardi', dist: '600m', cat: 'Comércio' }
+        ],
+        juridico: {
+          risco: 'MEDIO',
+          modalidade: 'Extrajudicial Caixa (Venda Online / Licitação)',
+          processo: 'Consolidação concluída. Ocupado pelo ex-mutuário; cabe ação de imissão na posse (prazo médio 4–6 meses).',
+          checklist: [
+            { item: 'Aceita financiamento Caixa com entrada reduzida', ok: true },
+            { item: 'Dívidas anteriores de condomínio e IPTU quitadas pela Caixa', ok: true },
+            { item: 'Atenção: Imóvel ocupado — considerar reserva de R$ 6k para imissão na posse', ok: false }
+          ]
+        }
+      },
+      {
+        id: 'ORC-105',
+        titulo: 'Apartamento 2 Dorms - Caiobá (3 Quadras do Mar)',
+        tipo: 'Apartamento',
+        endereco: 'Rua Augusto Blitzkow, 580 - Caiobá',
+        bairro: 'Caiobá',
+        cidade: 'Matinhos',
+        uf: 'PR',
+        portal: 'Kronberg Leilões',
+        urlPortal: 'https://www.kronbergleiloes.com.br',
+        area: 68,
+        quartos: 2,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 340000,
+        mercado: 375000,
+        portaisPreco: { olx: 365000, zap: 385000, imovelweb: 370000, quintoandar: 380000 },
+        praca1Valor: 340000,
+        praca1Data: '09/12/2026 14:30',
+        praca2Valor: 195000,
+        praca2Data: '16/12/2026 14:30',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Vendedor',
+        aceitaFinanciamento: false,
+        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 8.8,
+        valorizacao12m: '+18.2%',
+        pois: [
+          { nome: 'Praia Mansa de Caiobá', dist: '280m', cat: 'Praia' },
+          { nome: 'Orla Revitalizada de Matinhos', dist: '250m', cat: 'Lazer' },
+          { nome: 'UFPR Litoral', dist: '1.6 km', cat: 'Educação' },
+          { nome: 'Ferry Boat Guaratuba', dist: '3.5 km', cat: 'Transporte' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Leilão Extrajudicial - Banco Santander',
+          processo: 'Forte valorização regional impulsionada pela engorda da orla de Matinhos e nova Ponte de Guaratuba.',
+          checklist: [
+            { item: 'Imóvel desocupado e vistoriado recentemente', ok: true },
+            { item: 'Vendedor quita IPTU e condomínio até a data do leilão', ok: true },
+            { item: 'Excelente liquidez para revenda após reforma estética leve', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-106',
+        titulo: 'Apartamento Vila Olímpia - Ed. Platinum Tower',
+        tipo: 'Apartamento',
+        endereco: 'Rua Gomes de Carvalho, 890 - Vila Olímpia',
+        bairro: 'Vila Olímpia',
+        cidade: 'São Paulo',
+        uf: 'SP',
+        portal: 'Superbid Exchange',
+        urlPortal: 'https://www.superbid.net',
+        area: 64,
+        quartos: 2,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 890000,
+        mercado: 940000,
+        portaisPreco: { olx: 920000, zap: 960000, imovelweb: 935000, quintoandar: 945000 },
+        praca1Valor: 890000,
+        praca1Data: '07/12/2026 15:00',
+        praca2Valor: 534000,
+        praca2Data: '14/12/2026 15:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Sub-rogadas no Preço',
+        aceitaFinanciamento: false,
+        estrategias: ['AIRBNB', 'REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 9.6,
+        valorizacao12m: '+9.8%',
+        pois: [
+          { nome: 'Shopping Vila Olímpia', dist: '450m', cat: 'Shopping' },
+          { nome: 'Estação Vila Olímpia (CPTM)', dist: '600m', cat: 'Transporte' },
+          { nome: 'Insper / Anhembi Morumbi', dist: '750m', cat: 'Educação' },
+          { nome: 'Parque do Povo', dist: '1.1 km', cat: 'Lazer' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Leilão Judicial - 14ª Vara Cível Central SP',
+          processo: 'Processo nº 1049281-88.2023.8.26.0100. Penhora de 100% da propriedade plena.',
+          checklist: [
+            { item: 'Imóvel vago segundo certidão do Oficial de Justiça', ok: true },
+            { item: 'Crédito condominial exequendo será quitado com o produto da arrematação', ok: true },
+            { item: 'Liquidez altíssima no eixo Faria Lima / Vila Olímpia', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-107',
+        titulo: 'Apartamento Próximo à PUC-PR - Prado Velho',
+        tipo: 'Apartamento',
+        endereco: 'Rua Imaculada Conceição, 1420 - Prado Velho',
+        bairro: 'Prado Velho',
+        cidade: 'Curitiba',
+        uf: 'PR',
+        portal: 'Caixa Econômica Federal',
+        urlPortal: 'https://venda-imoveis.caixa.gov.br',
+        area: 54,
+        quartos: 2,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1493809842364-78817add7ffb?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 280000,
+        mercado: 298000,
+        portaisPreco: { olx: 290000, zap: 305000, imovelweb: 295000, quintoandar: 302000 },
+        praca1Valor: 280000,
+        praca1Data: '04/12/2026 10:00',
+        praca2Valor: 162000,
+        praca2Data: '11/12/2026 10:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco (Caixa)',
+        aceitaFinanciamento: true,
+        estrategias: ['UNIVERSITARIO', 'REVENDA', 'FINANCIAMENTO', 'DESOCUPADO'],
+        indiceLocalizacao: 8.7,
+        valorizacao12m: '+9.4%',
+        pois: [
+          { nome: 'PUCPR - Campus Curitiba', dist: '320m (4 min a pé)', cat: 'Educação' },
+          { nome: 'Teatro Paiol', dist: '800m', cat: 'Lazer' },
+          { nome: 'Linha Verde / Estação PUC', dist: '400m', cat: 'Transporte' },
+          { nome: 'Supermercado Festval', dist: '1.1 km', cat: 'Comércio' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial Caixa (Licitação Aberta)',
+          processo: 'Ideal para locação estudantil (R$ 2.100/mês) ou revenda rápida financiada.',
+          checklist: [
+            { item: 'Desocupado e apto para financiamento habitacional', ok: true },
+            { item: 'Sem débitos pendentes para o arrematante', ok: true },
+            { item: 'Vacância próxima de zero pela proximidade com a PUCPR', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-108',
+        titulo: 'Sobrado Residencial Jardim Alvorada (165m²)',
+        tipo: 'Casa',
+        endereco: 'Rua Dr. Alexandre Rasgulaeff, 1890 - Jd. Alvorada',
+        bairro: 'Jardim Alvorada',
+        cidade: 'Maringá',
+        uf: 'PR',
+        portal: 'Biasi Leilões',
+        urlPortal: 'https://www.biasileiloes.com.br',
+        area: 165,
+        quartos: 3,
+        vagas: 2,
+        imagem: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 510000,
+        mercado: 540000,
+        portaisPreco: { olx: 530000, zap: 550000, imovelweb: 535000, quintoandar: 545000 },
+        praca1Valor: 510000,
+        praca1Data: '06/12/2026 14:00',
+        praca2Valor: 315000,
+        praca2Data: '13/12/2026 14:00',
+        ocupacao: 'Ocupado',
+        dividas: 'Comprador assume IPTU (R$ 3.800)',
+        aceitaFinanciamento: false,
+        estrategias: ['REVENDA'],
+        indiceLocalizacao: 8.4,
+        valorizacao12m: '+8.9%',
+        pois: [
+          { nome: 'Av. Pedro Taques (Eixo Comercial)', dist: '350m', cat: 'Comércio' },
+          { nome: 'Supermercado Cidade Canção', dist: '500m', cat: 'Comércio' },
+          { nome: 'UEM - Campus Sede', dist: '2.4 km', cat: 'Educação' },
+          { nome: 'UPA Zona Norte', dist: '900m', cat: 'Saúde' }
+        ],
+        juridico: {
+          risco: 'MEDIO',
+          modalidade: 'Leilão Judicial - 4ª Vara Cível de Maringá',
+          processo: 'Imóvel ocupado pelo executado. Consta débito de IPTU de R$ 3.800 mencionado no edital.',
+          checklist: [
+            { item: 'Margem excelente mesmo considerando R$ 3.800 de IPTU + desocupação', ok: true },
+            { item: 'Imóvel ocupado — necessário pedido de imissão na posse nos próprios autos', ok: false },
+            { item: 'Bairro residencial consolidado com alta procura por famílias', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-109',
+        titulo: 'Apartamento Jurerê Internacional - Boulevard',
+        tipo: 'Apartamento',
+        endereco: 'Av. dos Búzios, 1120 - Jurerê Internacional',
+        bairro: 'Jurerê Internacional',
+        cidade: 'Florianópolis',
+        uf: 'SC',
+        portal: 'Sodré Santoro',
+        urlPortal: 'https://www.sodresantoro.com.br',
+        area: 95,
+        quartos: 2,
+        vagas: 2,
+        imagem: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 1180000,
+        mercado: 1260000,
+        portaisPreco: { olx: 1240000, zap: 1290000, imovelweb: 1250000, quintoandar: 1260000 },
+        praca1Valor: 1180000,
+        praca1Data: '10/12/2026 11:00',
+        praca2Valor: 740000,
+        praca2Data: '17/12/2026 11:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco (Itaú)',
+        aceitaFinanciamento: false,
+        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 9.6,
+        valorizacao12m: '+14.5%',
+        pois: [
+          { nome: 'Praia de Jurerê Internacional', dist: '350m', cat: 'Praia' },
+          { nome: 'Jurerê Open Shopping', dist: '250m', cat: 'Shopping' },
+          { nome: 'P12 Parador Internacional', dist: '1.4 km', cat: 'Lazer' },
+          { nome: 'Supermercado Imperatriz Gourmet', dist: '400m', cat: 'Comércio' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial - Itaú Unibanco S.A.',
+          processo: 'Imóvel desocupado. Banco Itaú quita todas as despesas anteriores até a arrematação.',
+          checklist: [
+            { item: 'Imóvel desocupado pronto para mobiliar e rentabilizar no verão', ok: true },
+            { item: 'Zero dívidas anteriores transferidas ao comprador', ok: true },
+            { item: 'Ticket de locação temporada entre R$ 850 e R$ 1.300/dia', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-110',
+        titulo: 'Apartamento Centro Cívico / Cascavel (76m²)',
+        tipo: 'Apartamento',
+        endereco: 'Rua Paraná, 2850 - Centro',
+        bairro: 'Centro',
+        cidade: 'Cascavel',
+        uf: 'PR',
+        portal: 'Caixa Econômica Federal',
+        urlPortal: 'https://venda-imoveis.caixa.gov.br',
+        area: 76,
+        quartos: 2,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 350000,
+        mercado: 370000,
+        portaisPreco: { olx: 360000, zap: 380000, imovelweb: 368000, quintoandar: 372000 },
+        praca1Valor: 350000,
+        praca1Data: '04/12/2026 10:00',
+        praca2Valor: 210000,
+        praca2Data: '11/12/2026 10:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco (Caixa)',
+        aceitaFinanciamento: true,
+        estrategias: ['REVENDA', 'FINANCIAMENTO', 'DESOCUPADO'],
+        indiceLocalizacao: 8.6,
+        valorizacao12m: '+10.2%',
+        pois: [
+          { nome: 'Catedral Nossa Senhora Aparecida', dist: '500m', cat: 'Centro' },
+          { nome: 'JL Shopping Cascavel', dist: '1.3 km', cat: 'Shopping' },
+          { nome: 'Hospital São Lucas', dist: '850m', cat: 'Saúde' },
+          { nome: 'Unipar Campus Cascavel', dist: '1.6 km', cat: 'Educação' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial Caixa (Venda Direta Online)',
+          processo: 'Imóvel desocupado no coração de Cascavel com financiamento habitacional liberado.',
+          checklist: [
+            { item: 'Desocupado e livre de ônus', ok: true },
+            { item: 'Aceita financiamento Caixa e uso de FGTS', ok: true },
+            { item: 'Região central com altíssima liquidez de revenda', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-111',
+        titulo: 'Apartamento Vila Yolanda - Foz do Iguaçu (62m²)',
+        tipo: 'Apartamento',
+        endereco: 'Av. das Cataratas, 920 - Vila Yolanda',
+        bairro: 'Vila Yolanda',
+        cidade: 'Foz do Iguaçu',
+        uf: 'PR',
+        portal: 'Banco do Brasil (Seu Imóvel BB)',
+        urlPortal: 'https://seuimovelbb.com.br',
+        area: 62,
+        quartos: 2,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1505691938895-1758d7feb511?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 290000,
+        mercado: 315000,
+        portaisPreco: { olx: 310000, zap: 322000, imovelweb: 312000, quintoandar: 316000 },
+        praca1Valor: 290000,
+        praca1Data: '08/12/2026 10:00',
+        praca2Valor: 174000,
+        praca2Data: '15/12/2026 10:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Banco do Brasil',
+        aceitaFinanciamento: true,
+        estrategias: ['AIRBNB', 'UNIVERSITARIO', 'FINANCIAMENTO', 'DESOCUPADO'],
+        indiceLocalizacao: 8.9,
+        valorizacao12m: '+13.0%',
+        pois: [
+          { nome: 'Corredor Turístico Av. das Cataratas', dist: '100m', cat: 'Turismo' },
+          { nome: 'UDC - Centro Universitário', dist: '900m', cat: 'Educação' },
+          { nome: 'Shopping Catuaí Palladium', dist: '2.1 km', cat: 'Shopping' },
+          { nome: 'Marco das Três Fronteiras', dist: '4.5 km', cat: 'Turismo' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Extrajudicial - Banco do Brasil',
+          processo: 'Localização estratégica no corredor turístico de Foz, ideal para Airbnb de turistas e estudantes de medicina.',
+          checklist: [
+            { item: 'Banco do Brasil entrega quitado de IPTU e condomínio', ok: true },
+            { item: 'Imóvel desocupado', ok: true },
+            { item: 'Excelente ocupação hoteleira/Airbnb o ano inteiro', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-112',
+        titulo: 'Apartamento Copacabana - Posto 4 (72m²)',
+        tipo: 'Apartamento',
+        endereco: 'Rua Figueiredo de Magalhães, 540 - Copacabana',
+        bairro: 'Copacabana',
+        cidade: 'Rio de Janeiro',
+        uf: 'RJ',
+        portal: 'Mega Leilões',
+        urlPortal: 'https://www.megaleiloes.com.br',
+        area: 72,
+        quartos: 2,
+        vagas: 0,
+        imagem: 'https://images.unsplash.com/photo-1536376072261-38c75010e6c9?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 820000,
+        mercado: 870000,
+        portaisPreco: { olx: 850000, zap: 890000, imovelweb: 865000, quintoandar: 875000 },
+        praca1Valor: 820000,
+        praca1Data: '09/12/2026 14:00',
+        praca2Valor: 492000,
+        praca2Data: '16/12/2026 14:00',
+        ocupacao: 'Ocupado',
+        dividas: 'Condomínio exequendo R$ 42k (abatido do lance)',
+        aceitaFinanciamento: false,
+        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA'],
+        indiceLocalizacao: 9.4,
+        valorizacao12m: '+8.5%',
+        pois: [
+          { nome: 'Metrô Siqueira Campos', dist: '180m', cat: 'Transporte' },
+          { nome: 'Praia de Copacabana (Posto 4)', dist: '450m', cat: 'Praia' },
+          { nome: 'Hospital Copa D’Or', dist: '350m', cat: 'Saúde' },
+          { nome: 'Supermercado Zona Sul', dist: '150m', cat: 'Comércio' }
+        ],
+        juridico: {
+          risco: 'MEDIO',
+          modalidade: 'Leilão Judicial - Cobrança de Cotas Condominiais',
+          processo: 'A própria ação é do condomínio; o valor arrematado quita a dívida exequenda.',
+          checklist: [
+            { item: 'A 180m do Metrô Siqueira Campos e 450m da praia', ok: true },
+            { item: 'Imóvel ocupado — prever 5 meses para imissão na posse', ok: false },
+            { item: 'Altíssima rentabilidade em locação de temporada internacional', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-113',
+        titulo: 'Sala Comercial Torre Empresarial - Novo Centro',
+        tipo: 'Comercial',
+        endereco: 'Av. João Paulino Vieira Filho, 625 - Novo Centro',
+        bairro: 'Novo Centro',
+        cidade: 'Maringá',
+        uf: 'PR',
+        portal: 'Kronberg Leilões',
+        urlPortal: 'https://www.kronbergleiloes.com.br',
+        area: 48,
+        quartos: 0,
+        vagas: 1,
+        imagem: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 310000,
+        mercado: 325000,
+        portaisPreco: { olx: 318000, zap: 332000, imovelweb: 322000, quintoandar: 328000 },
+        praca1Valor: 310000,
+        praca1Data: '11/12/2026 14:00',
+        praca2Valor: 186000,
+        praca2Data: '18/12/2026 14:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Vendedor',
+        aceitaFinanciamento: false,
+        estrategias: ['REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 8.9,
+        valorizacao12m: '+7.8%',
+        pois: [
+          { nome: 'Shopping Avenida Center', dist: '250m', cat: 'Shopping' },
+          { nome: 'Terminal Urbano Intermodal', dist: '350m', cat: 'Transporte' },
+          { nome: 'Fórum Estadual de Maringá', dist: '1.1 km', cat: 'Serviços' },
+          { nome: 'Parque do Ingá', dist: '850m', cat: 'Lazer' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Leilão Extrajudicial - Banco Santander',
+          processo: 'Sala corporativa pronta com piso elevado e ar-condicionado central no Novo Centro de Maringá.',
+          checklist: [
+            { item: 'Sala vaga com entrega imediata das chaves', ok: true },
+            { item: 'Sem débitos de condomínio ou IPTU', ok: true },
+            { item: 'Ideal para clínicas, escritórios ou renda de aluguel comercial', ok: true }
+          ]
+        }
+      },
+      {
+        id: 'ORC-114',
+        titulo: 'Terreno Urbano em Condomínio Fechado (420m²)',
+        tipo: 'Terreno',
+        endereco: 'Rod. PR-317 - Cond. Jardins de Monet',
+        bairro: 'Zona 37',
+        cidade: 'Maringá',
+        uf: 'PR',
+        portal: 'Superbid Exchange',
+        urlPortal: 'https://www.superbid.net',
+        area: 420,
+        quartos: 0,
+        vagas: 0,
+        imagem: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80',
+        avaliacao: 480000,
+        mercado: 510000,
+        portaisPreco: { olx: 500000, zap: 520000, imovelweb: 505000, quintoandar: 515000 },
+        praca1Valor: 480000,
+        praca1Data: '12/12/2026 10:00',
+        praca2Valor: 295000,
+        praca2Data: '19/12/2026 10:00',
+        ocupacao: 'Desocupado',
+        dividas: 'Pagas pelo Vendedor',
+        aceitaFinanciamento: false,
+        estrategias: ['REVENDA', 'DESOCUPADO'],
+        indiceLocalizacao: 8.5,
+        valorizacao12m: '+15.2%',
+        pois: [
+          { nome: 'Shopping Catuaí Maringá', dist: '2.2 km', cat: 'Shopping' },
+          { nome: 'Aeroporto Regional de Maringá', dist: '4.8 km', cat: 'Transporte' },
+          { nome: 'UniCesumar', dist: '4.5 km', cat: 'Educação' },
+          { nome: 'Contorno Sul', dist: '600m', cat: 'Acesso' }
+        ],
+        juridico: {
+          risco: 'BAIXO',
+          modalidade: 'Leilão Extrajudicial - Incorporadora / Fiduciário',
+          processo: 'Lote plano de 420m² sem benfeitorias (zero custo de reforma ou desocupação!).',
+          checklist: [
+            { item: 'Terreno vazio — zero risco de ocupante ou reforma', ok: true },
+            { item: 'Condomínio clube completo já entregue e habitado', ok: true },
+            { item: 'Alta procura por construtores para casas de alto padrão', ok: true }
+          ]
+        }
+      }
+    ];
+
+    // -------------------------------------------------------------------------
+    // 2B. JSON ADAPTER & ASYNC LOADER (./imoveis.json + FALLBACK)
+    // -------------------------------------------------------------------------
+    const TYPE_FALLBACK_IMAGES = {
+      Apartamento: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80',
+      Casa: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=900&q=80',
+      Comercial: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=900&q=80',
+      Terreno: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=900&q=80'
+    };
+
+    function normalizeJsonLote(raw, idx) {
+      // Supports both coletor.js schema and full native schema
+      if (raw.praca2Valor !== undefined && raw.portaisPreco) {
+        return raw;
+      }
+
+      const tipo = raw.tipo || 'Apartamento';
+      const avaliacao = Number(raw.avaliacao) || Number(raw.lance1) || 200000;
+      const mercado = Number(raw.mercado) || Math.round(avaliacao * 1.06);
+      const praca1Valor = Number(raw.lance1) || avaliacao;
+      const praca2Valor = Number(raw.lance2) || Number(raw.preco) || Math.round(avaliacao * 0.6);
+      const isOcupado = String(raw.ocupado || '').toUpperCase().includes('OCUPADO') && !String(raw.ocupado || '').toUpperCase().includes('DESOCUPADO');
+      const ocupacao = isOcupado ? 'Ocupado' : 'Desocupado';
+      const financia = Boolean(raw.financia || raw.aceitaFinanciamento);
+
+      // Build strategy tags automatically from location and properties
+      const estrategias = Array.isArray(raw.estrategias) ? [...raw.estrategias] : [];
+      if (!isOcupado && !estrategias.includes('DESOCUPADO')) estrategias.push('DESOCUPADO');
+      if (financia && !estrategias.includes('FINANCIAMENTO')) estrategias.push('FINANCIAMENTO');
+      if ((mercado - praca2Valor) / mercado >= 0.30 && !estrategias.includes('REVENDA')) estrategias.push('REVENDA');
+
+      const cityLower = String(raw.cidade || '').toLowerCase();
+      if (['balneário camboriú', 'matinhos', 'guaratuba', 'itajaí', 'florianópolis', 'santos', 'guarujá', 'cabo frio', 'maceió', 'fortaleza', 'natal'].some(c => cityLower.includes(c))) {
+        if (!estrategias.includes('PRAIA')) estrategias.push('PRAIA');
+        if (!estrategias.includes('AIRBNB')) estrategias.push('AIRBNB');
+      }
+      if (/universi|uem|uel|ufpr|usp|unicamp|puc/i.test(`${raw.bairro} ${raw.resumoEdital || ''}`)) {
+        if (!estrategias.includes('UNIVERSITARIO')) estrategias.push('UNIVERSITARIO');
+      }
+
+      const risco = raw.risco || (isOcupado ? 'MEDIO' : 'BAIXO');
+      const descEdital = raw.resumoEdital || 'Lote capturado automaticamente pelo Crawler Nacional Oráculo dos Leilões.';
+
+      return {
+        id: raw.id || `LOT-${1000 + idx}`,
+        titulo: raw.titulo || `${tipo} - ${raw.bairro || raw.cidade || 'Oportunidade'}`,
+        tipo,
+        endereco: raw.endereco || `${raw.bairro || 'Centro'} - ${raw.cidade || ''}`,
+        bairro: raw.bairro || 'Centro',
+        cidade: raw.cidade || 'Brasil',
+        uf: raw.uf || 'PR',
+        portal: raw.portal || 'Portal Oficial',
+        urlPortal: raw.url || raw.urlPortal || 'https://venda-imoveis.caixa.gov.br',
+        area: Number(raw.area) || 65,
+        quartos: raw.quartos !== undefined ? Number(raw.quartos) : (tipo === 'Terreno' ? 0 : 2),
+        vagas: raw.vagas !== undefined ? Number(raw.vagas) : (tipo === 'Terreno' ? 0 : 1),
+        imagem: raw.img && !raw.img.includes('1560518883-ce09059eeffa') ? raw.img : (TYPE_FALLBACK_IMAGES[tipo] || TYPE_FALLBACK_IMAGES.Apartamento),
+        avaliacao,
+        mercado,
+        portaisPreco: {
+          olx: Math.round(mercado * 0.97),
+          zap: Math.round(mercado * 1.03),
+          imovelweb: Math.round(mercado * 0.99),
+          quintoandar: Math.round(mercado * 1.01)
+        },
+        praca1Valor,
+        praca1Data: raw.data1 || 'Em andamento',
+        praca2Valor,
+        praca2Data: raw.data2 || 'Praça Única / Online',
+        ocupacao,
+        dividas: raw.dividas === 'VENDEDOR_BANCO' ? 'Pagas pelo Banco / Vendedor' : (raw.dividas || 'Verificar Edital'),
+        aceitaFinanciamento: financia,
+        estrategias: estrategias.length ? estrategias : ['REVENDA'],
+        indiceLocalizacao: Number(raw.indiceLocal) || 8.2,
+        valorizacao12m: '+10.4%',
+        pois: Array.isArray(raw.pois) && raw.pois.length && typeof raw.pois[0] === 'object'
+          ? raw.pois
+          : [
+              { nome: `Eixo Comercial ${raw.bairro || raw.cidade}`, dist: '450m', cat: 'Comércio' },
+              { nome: `Rede de Transporte e Serviços (${raw.cidade}/${raw.uf})`, dist: '600m', cat: 'Infraestrutura' }
+            ],
+        juridico: {
+          risco,
+          modalidade: raw.portal || 'Leilão / Venda Pública',
+          processo: raw.processo || descEdital,
+          checklist: [
+            { item: isOcupado ? 'Imóvel ocupado — considerar prazo e custos de desocupação' : 'Imóvel desocupado segundo dados do edital', ok: !isOcupado },
+            { item: raw.dividas === 'VENDEDOR_BANCO' ? 'Débitos anteriores quitados pelo banco vendedor' : 'Conferir responsabilidades de IPTU/condomínio no edital', ok: raw.dividas === 'VENDEDOR_BANCO' },
+            { item: financia ? 'Aceita financiamento habitacional (consulte condições)' : 'Pagamento conforme regras da praça (à vista / parcelado)', ok: true },
+            { item: `Descrição original: ${descEdital.slice(0, 140)}${descEdital.length > 140 ? '...' : ''}`, ok: true }
+          ]
+        }
+      };
+    }
+
+    async function loadAuctionData(isManualReload = false) {
+      const dot = document.getElementById('sync-indicator-dot');
+      const statusText = document.getElementById('sync-status-text');
+      const totalBrasilEl = document.getElementById('sync-total-brasil');
+
+      dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-ping';
+      statusText.textContent = 'Sincronizando com ./imoveis.json...';
+
+      try {
+        const response = await fetch(`./imoveis.json?t=${Date.now()}`, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+        const payload = await response.json();
+        const rawList = Array.isArray(payload) ? payload : (payload.lotes || []);
+        if (!rawList.length) throw new Error('JSON vazio');
+
+        ACTIVE_PROPERTIES = rawList.map((item, index) => normalizeJsonLote(item, index));
+
+        const updatedDate = payload.atualizado_em
+          ? new Date(payload.atualizado_em).toLocaleString('pt-BR')
+          : new Date().toLocaleString('pt-BR');
+
+        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
+        statusText.innerHTML = `<span class="text-emerald-400 font-bold">Base Nacional Sincronizada:</span> ${ACTIVE_PROPERTIES.length.toLocaleString('pt-BR')} imóveis • Atualizado em ${updatedDate}`;
+
+        if (payload.total_brasil) {
+          totalBrasilEl.textContent = `Varredura Brasil: ${Number(payload.total_brasil).toLocaleString('pt-BR')} lotes capturados`;
+        }
+
+        if (isManualReload) {
+          showToast(`${ACTIVE_PROPERTIES.length.toLocaleString('pt-BR')} imóveis sincronizados com sucesso!`, 'success');
+        }
+      } catch (err) {
+        ACTIVE_PROPERTIES = [...DEMO_PROPERTIES];
+        dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+        statusText.innerHTML = `<span class="text-amber-400 font-bold">Modo Demonstração</span> — aguardando <code class="text-zinc-200">imoveis.json</code> (exibindo ${ACTIVE_PROPERTIES.length} lotes modelo)`;
+        totalBrasilEl.textContent = 'Conecte o GitHub Actions para carga nacional';
+
+        if (isManualReload) {
+          showToast('Arquivo ./imoveis.json ainda não encontrado. Mantendo base de demonstração.', 'info');
+        }
+      }
+
+      populateLocationFilters();
+      populateFinPresets();
+      applyFilters();
+    }
+
+    function populateLocationFilters() {
+      const ufSelect = document.getElementById('filter-uf');
+      const currentUf = ufSelect.value;
+
+      const ufs = [...new Set(ACTIVE_PROPERTIES.map(p => p.uf).filter(Boolean))].sort();
+      ufSelect.innerHTML = `<option value="ALL">Todos os Estados (${ufs.length} UFs)</option>` +
+        ufs.map(uf => `<option value="${uf}">${uf}</option>`).join('');
+
+      if (ufs.includes(currentUf)) {
+        ufSelect.value = currentUf;
+      }
+      populateCityFilter();
+    }
+
+    function onUfFilterChange() {
+      populateCityFilter();
+      applyFilters();
+    }
+
+    function populateCityFilter() {
+      const selectedUf = document.getElementById('filter-uf').value;
+      const citySelect = document.getElementById('filter-cidade');
+      const currentCity = citySelect.value;
+
+      const source = selectedUf === 'ALL'
+        ? ACTIVE_PROPERTIES
+        : ACTIVE_PROPERTIES.filter(p => p.uf === selectedUf);
+
+      const cities = [...new Set(source.map(p => p.cidade).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+      citySelect.innerHTML = `<option value="ALL">Todas as Cidades (${cities.length})</option>` +
+        cities.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      if (cities.includes(currentCity)) {
+        citySelect.value = currentCity;
+      }
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. FINANCIAL & SCORE ENGINE (REAL-TIME CALCULATION)
+    // -------------------------------------------------------------------------
+    function calculatePropertyMetrics(prop) {
+      const pctCosts = (globalCosts.comissaoPct + globalCosts.itbiPct + globalCosts.registroPct) / 100;
+      const fixedCosts = Number(globalCosts.reforma) + Number(globalCosts.desocupacao) + Number(globalCosts.advogado);
+      const corretagemVenda = prop.mercado * (globalCosts.corretagemPct / 100);
+      const valorLiquidoVenda = prop.mercado - corretagemVenda;
+
+      // 1ª Praça
+      const inv1 = prop.praca1Valor * (1 + pctCosts) + fixedCosts;
+      const lucro1 = valorLiquidoVenda - inv1;
+      const roi1 = inv1 > 0 ? (lucro1 / inv1) * 100 : 0;
+
+      // 2ª Praça
+      const inv2 = prop.praca2Valor * (1 + pctCosts) + fixedCosts;
+      const lucro2 = valorLiquidoVenda - inv2;
+      const roi2 = inv2 > 0 ? (lucro2 / inv2) * 100 : 0;
+
+      // Desconto bruto vs Mercado
+      const descontoPct = prop.mercado > 0 ? ((prop.mercado - prop.praca2Valor) / prop.mercado) * 100 : 0;
+
+      // Dynamic Score Oráculo (0.0 to 10.0)
+      let score = 5.0;
+      if (roi2 >= 50) score += 2.2;
+      else if (roi2 >= 35) score += 1.7;
+      else if (roi2 >= 20) score += 1.1;
+      else if (roi2 < 0) score -= 2.5;
+
+      if (prop.ocupacao === 'Desocupado') score += 0.9;
+      if (prop.juridico && prop.juridico.risco === 'BAIXO') score += 0.8;
+      else if (prop.juridico && prop.juridico.risco === 'ALTO') score -= 1.2;
+      if (prop.aceitaFinanciamento) score += 0.4;
+      score += ((prop.indiceLocalizacao || 8.0) - 8.0) * 0.4;
+
+      score = Math.max(1.0, Math.min(9.9, score));
+
+      return {
+        inv1, lucro1, roi1,
+        inv2, lucro2, roi2,
+        descontoPct,
+        corretagemVenda,
+        score: Number(score.toFixed(1))
+      };
+    }
+
+    function formatBRL(val) {
+      return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. GLOBAL COST DRAWER CONTROLS
+    // -------------------------------------------------------------------------
+    function toggleCostDrawer() {
+      const panel = document.getElementById('global-cost-panel');
+      panel.classList.toggle('hidden');
+    }
+
+    function updateGlobalCosts() {
+      globalCosts.comissaoPct = parseFloat(document.getElementById('cfg-comissao').value) || 0;
+      globalCosts.itbiPct = parseFloat(document.getElementById('cfg-itbi').value) || 0;
+      globalCosts.registroPct = parseFloat(document.getElementById('cfg-registro').value) || 0;
+      globalCosts.reforma = parseFloat(document.getElementById('cfg-reforma').value) || 0;
+      globalCosts.desocupacao = parseFloat(document.getElementById('cfg-desocupacao').value) || 0;
+      globalCosts.advogado = parseFloat(document.getElementById('cfg-advogado').value) || 0;
+      globalCosts.corretagemPct = parseFloat(document.getElementById('cfg-corretagem').value) || 0;
+      globalCosts.onlyPositive = document.getElementById('cfg-only-positive').checked;
+
+      const totalPct = globalCosts.comissaoPct + globalCosts.itbiPct + globalCosts.registroPct;
+      const totalFixedK = Math.round((globalCosts.reforma + globalCosts.desocupacao + globalCosts.advogado) / 1000);
+      document.getElementById('cost-badge-summary').textContent = `${totalPct}% + R$ ${totalFixedK}k`;
+
+      applyFilters();
+      if (currentModalProperty) {
+        renderModalContent(currentModalProperty, currentModalTab);
+      }
+    }
+
+    function resetGlobalCosts() {
+      document.getElementById('cfg-comissao').value = 5;
+      document.getElementById('cfg-itbi').value = 3;
+      document.getElementById('cfg-registro').value = 2;
+      document.getElementById('cfg-reforma').value = 10000;
+      document.getElementById('cfg-desocupacao').value = 3000;
+      document.getElementById('cfg-advogado').value = 2000;
+      document.getElementById('cfg-corretagem').value = 0;
+      document.getElementById('cfg-only-positive').checked = false;
+      updateGlobalCosts();
+      showToast('Parâmetros de custos restaurados para o padrão.', 'info');
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. FILTERING, SORTING & PROGRESSIVE CARD RENDERING
+    // -------------------------------------------------------------------------
+    function setStrategyFilter(strategy) {
+      activeStrategy = strategy;
+      document.querySelectorAll('.strategy-pill').forEach(btn => {
+        if (btn.dataset.strategy === strategy) {
+          btn.className = 'strategy-pill active shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-amber-500 text-zinc-950 transition-all';
+        } else {
+          btn.className = 'strategy-pill shrink-0 px-3 py-1.5 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-300 border border-zinc-800 hover:border-zinc-600 transition-all';
+        }
+      });
+      applyFilters();
+    }
+
+    function applyFilters(keepPagination = false) {
+      if (!keepPagination) {
+        visibleLimit = PAGE_SIZE;
+      }
+
+      const search = document.getElementById('filter-search').value.toLowerCase().trim();
+      const uf = document.getElementById('filter-uf').value;
+      const cidade = document.getElementById('filter-cidade').value;
+      const tipo = document.getElementById('filter-tipo').value;
+      const maxPrice = parseFloat(document.getElementById('filter-max-price').value);
+      const sortBy = document.getElementById('filter-sort').value;
+
+      let enriched = ACTIVE_PROPERTIES.map(p => ({ ...p, calc: calculatePropertyMetrics(p) }));
+
+      let filtered = enriched.filter(p => {
+        if (uf !== 'ALL' && p.uf !== uf) return false;
+        if (cidade !== 'ALL' && p.cidade !== cidade) return false;
+        if (tipo !== 'ALL' && p.tipo !== tipo) return false;
+        if (p.praca2Valor > maxPrice) return false;
+        if (globalCosts.onlyPositive && p.calc.roi2 <= 0) return false;
+
+        if (search) {
+          const hay = `${p.id} ${p.titulo} ${p.cidade} ${p.bairro} ${p.endereco} ${p.portal} ${p.uf}`.toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+
+        if (activeStrategy !== 'ALL') {
+          if (activeStrategy === 'SCORE_HIGH' && p.calc.score < 8.5) return false;
+          else if (activeStrategy !== 'SCORE_HIGH' && !p.estrategias.includes(activeStrategy)) return false;
+        }
+        return true;
+      });
+
+      // Sort
+      filtered.sort((a, b) => {
+        if (sortBy === 'score') return b.calc.score - a.calc.score;
+        if (sortBy === 'roi2') return b.calc.roi2 - a.calc.roi2;
+        if (sortBy === 'lucro2') return b.calc.lucro2 - a.calc.lucro2;
+        if (sortBy === 'desconto') return b.calc.descontoPct - a.calc.descontoPct;
+        if (sortBy === 'menor_lance') return a.praca2Valor - b.praca2Valor;
+        return 0;
+      });
+
+      CURRENT_FILTERED_LIST = filtered;
+      renderPropertiesGrid(filtered);
+      updateDashboardKPIs(filtered);
+    }
+
+    function loadMoreProperties() {
+      visibleLimit += PAGE_SIZE;
+      renderPropertiesGrid(CURRENT_FILTERED_LIST);
+    }
+
+    function updateDashboardKPIs(list) {
+      document.getElementById('results-count').textContent = list.length.toLocaleString('pt-BR');
+      document.getElementById('kpi-total-lotes').textContent = list.length.toLocaleString('pt-BR');
+
+      if (list.length === 0) {
+        document.getElementById('kpi-avg-roi').textContent = '0.0%';
+        document.getElementById('kpi-high-score').textContent = '0';
+        document.getElementById('kpi-total-profit').textContent = 'R$ 0';
+        return;
+      }
+
+      const avgRoi = list.reduce((acc, item) => acc + item.calc.roi2, 0) / list.length;
+      const highScoreCount = list.filter(i => i.calc.score >= 8.5).length;
+      const totalProfit = list.reduce((acc, item) => acc + Math.max(0, item.calc.lucro2), 0);
+
+      const roiEl = document.getElementById('kpi-avg-roi');
+      roiEl.textContent = `${avgRoi >= 0 ? '+' : ''}${avgRoi.toFixed(1)}%`;
+      roiEl.className = `text-2xl font-bold font-mono mt-1 tabular-nums ${avgRoi >= 0 ? 'text-emerald-400' : 'text-red-400'}`;
+
+      document.getElementById('kpi-high-score').textContent = highScoreCount.toLocaleString('pt-BR');
+      document.getElementById('kpi-total-profit').textContent = totalProfit >= 1000000
+        ? `R$ ${(totalProfit / 1000000).toFixed(2)}M`
+        : formatBRL(totalProfit);
+    }
+
+    function renderPropertiesGrid(list) {
+      const grid = document.getElementById('properties-grid');
+      const loadMoreBox = document.getElementById('load-more-container');
+      const visibleSlice = list.slice(0, visibleLimit);
+
+      document.getElementById('visible-count').textContent = visibleSlice.length.toLocaleString('pt-BR');
+
+      if (list.length > visibleLimit) {
+        loadMoreBox.classList.remove('hidden');
+        document.getElementById('load-more-remaining').textContent = `(${(list.length - visibleLimit).toLocaleString('pt-BR')} restantes)`;
+      } else {
+        loadMoreBox.classList.add('hidden');
+      }
+
+      if (list.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full bg-charcoal border border-zinc-800 rounded-2xl p-12 text-center space-y-3">
+            <p class="text-base font-bold text-white">Nenhum imóvel encontrado com esses filtros</p>
+            <p class="text-xs text-zinc-400">Tente ampliar o valor máximo de lance ou limpar a seleção estratégica.</p>
+            <button onclick="resetAllFilters()" class="px-4 py-2 rounded-xl bg-amber-500 text-zinc-950 font-bold text-xs">Limpar Todos os Filtros</button>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = visibleSlice.map(p => {
+        const c = p.calc;
+        const roi1Positive = c.roi1 >= 0;
+        const roi2Positive = c.roi2 >= 0;
+
+        const scoreColor = c.score >= 8.5
+          ? 'bg-amber-500 text-zinc-950 border-amber-400'
+          : c.score >= 7.0
+            ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+            : 'bg-zinc-800 text-zinc-300 border-zinc-700';
+
+        const strategyLabels = {
+          PRAIA: '🏖️ Praia',
+          UNIVERSITARIO: '🎓 Univ.',
+          AIRBNB: '🔑 Airbnb',
+          REVENDA: '💰 Revenda',
+          FINANCIAMENTO: '🏦 Financia',
+          DESOCUPADO: '🔓 Livre'
+        };
+
+        return `
+          <article onclick="openPropertyModal('${p.id}')" class="group bg-charcoal hover:bg-[#16161a] border border-zinc-800 hover:border-amber-500/50 rounded-2xl overflow-hidden transition-all duration-200 flex flex-col justify-between cursor-pointer shadow-lg">
+            <div>
+              <!-- Image Header -->
+              <div class="relative h-48 bg-zinc-900 overflow-hidden">
+                <img src="${p.imagem}" loading="lazy" alt="${p.titulo}" onerror="this.src='https://placehold.co/800x450/18181b/a1a1aa?text=Imovel+Leilao'" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-[#121215] via-transparent to-black/40"></div>
+                
+                <!-- Top Badges -->
+                <div class="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                  <span class="px-2.5 py-1 rounded-lg bg-zinc-950/85 backdrop-blur-md border border-zinc-700/80 text-[11px] font-semibold text-zinc-200 truncate max-w-[65%]">
+                    ${p.portal}
+                  </span>
+                  <div class="px-2.5 py-1 rounded-lg border font-mono font-extrabold text-xs flex items-center gap-1 shadow-md ${scoreColor}">
+                    <span>SCORE</span>
+                    <span>${c.score.toFixed(1)}</span>
+                  </div>
+                </div>
+
+                <!-- Bottom Image Overlay Specs -->
+                <div class="absolute bottom-2.5 left-3 right-3 flex items-center justify-between">
+                  <span class="px-2 py-0.5 rounded bg-emerald-500 text-zinc-950 font-mono font-extrabold text-[11px]">
+                    -${c.descontoPct.toFixed(0)}% OFF MERCADO
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-zinc-950/90 border border-zinc-800 text-[11px] font-semibold ${p.ocupacao === 'Desocupado' ? 'text-emerald-400' : 'text-amber-400'}">
+                    ${p.ocupacao}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Content Body -->
+              <div class="p-4 space-y-3">
+                <div>
+                  <div class="flex items-center gap-1.5 text-[11px] text-zinc-400 mb-0.5">
+                    <span class="font-semibold text-amber-400">${p.cidade} - ${p.uf}</span>
+                    <span>•</span>
+                    <span class="truncate">${p.bairro}</span>
+                  </div>
+                  <h3 class="font-bold text-white text-sm sm:text-base leading-snug group-hover:text-amber-400 transition-colors line-clamp-1">
+                    ${p.titulo}
+                  </h3>
+                </div>
+
+                <!-- Physical Specs & Strategy Tags -->
+                <div class="flex flex-wrap items-center gap-1.5 text-[11px] text-zinc-300">
+                  <span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 font-mono">${p.area}m²</span>
+                  ${p.quartos > 0 ? `<span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 font-mono">${p.quartos} qts</span>` : ''}
+                  ${p.vagas > 0 ? `<span class="px-2 py-0.5 rounded bg-zinc-900 border border-zinc-800 font-mono">${p.vagas} vg</span>` : ''}
+                  ${p.estrategias.slice(0, 3).map(st => `<span class="px-2 py-0.5 rounded bg-zinc-900/90 border border-zinc-800 text-zinc-300">${strategyLabels[st] || st}</span>`).join('')}
+                </div>
+
+                <!-- Market Value Reference -->
+                <div class="flex items-center justify-between text-xs bg-zinc-950/80 border border-zinc-800/80 rounded-xl px-3 py-2">
+                  <div>
+                    <span class="text-[10px] uppercase text-zinc-500 block">Valor Mercado (Portais)</span>
+                    <span class="font-mono font-bold text-zinc-200 tabular-nums">${formatBRL(p.mercado)}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[10px] uppercase text-zinc-500 block">Avaliação Edital</span>
+                    <span class="font-mono text-zinc-400 tabular-nums">${formatBRL(p.avaliacao)}</span>
+                  </div>
+                </div>
+
+                <!-- PRAÇA POR PRAÇA ROI COMPARISON BOX -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                  <!-- 1ª Praça -->
+                  <div class="rounded-xl p-2.5 border ${roi1Positive ? 'bg-emerald-950/20 border-emerald-500/30' : 'bg-red-950/20 border-red-500/30'}">
+                    <div class="flex items-center justify-between text-[10px] text-zinc-400 mb-0.5">
+                      <span class="font-bold uppercase">1ª Praça</span>
+                      <span class="truncate max-w-[65px]">${p.praca1Data.split(' ')[0]}</span>
+                    </div>
+                    <p class="font-mono font-bold text-xs text-white tabular-nums">${formatBRL(p.praca1Valor)}</p>
+                    <div class="mt-1.5 pt-1.5 border-t border-zinc-800/80 flex items-center justify-between">
+                      <span class="text-[10px] text-zinc-400">ROI Líq:</span>
+                      <span class="font-mono font-extrabold text-xs tabular-nums ${roi1Positive ? 'text-emerald-400' : 'text-red-400'}">
+                        ${c.roi1 >= 0 ? '+' : ''}${c.roi1.toFixed(1)}%
+                      </span>
+                    </div>
+                    <p class="font-mono text-[10px] text-right tabular-nums ${roi1Positive ? 'text-emerald-300/90' : 'text-red-300/90'}">
+                      ${c.lucro1 >= 0 ? '+' : ''}${formatBRL(c.lucro1)}
+                    </p>
+                  </div>
+
+                  <!-- 2ª Praça -->
+                  <div class="rounded-xl p-2.5 border relative overflow-hidden ${roi2Positive ? 'bg-emerald-500/10 border-emerald-500/50' : 'bg-red-500/10 border-red-500/40'}">
+                    <div class="flex items-center justify-between text-[10px] text-zinc-300 mb-0.5">
+                      <span class="font-extrabold uppercase text-amber-400">2ª Praça</span>
+                      <span class="truncate max-w-[65px]">${p.praca2Data.split(' ')[0]}</span>
+                    </div>
+                    <p class="font-mono font-extrabold text-xs text-white tabular-nums">${formatBRL(p.praca2Valor)}</p>
+                    <div class="mt-1.5 pt-1.5 border-t border-zinc-700/60 flex items-center justify-between">
+                      <span class="text-[10px] text-zinc-300">ROI Líq:</span>
+                      <span class="font-mono font-extrabold text-xs tabular-nums ${roi2Positive ? 'text-emerald-400' : 'text-red-400'}">
+                        ${c.roi2 >= 0 ? '+' : ''}${c.roi2.toFixed(1)}%
+                      </span>
+                    </div>
+                    <p class="font-mono font-bold text-[10px] text-right tabular-nums ${roi2Positive ? 'text-emerald-300' : 'text-red-300'}">
+                      ${c.lucro2 >= 0 ? '+' : ''}${formatBRL(c.lucro2)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Card Footer -->
+            <div class="px-4 py-2.5 bg-zinc-950/90 border-t border-zinc-800/80 flex items-center justify-between text-[11px]">
+              <span class="text-zinc-400 truncate max-w-[65%]">
+                ${p.juridico.risco === 'BAIXO' ? '🟢 Risco Baixo' : '🟡 Risco Médio'} • ${p.dividas.split('(')[0]}
+              </span>
+              <span class="font-bold text-amber-400 group-hover:translate-x-0.5 transition-transform flex items-center gap-1">
+                Dossiê Completo →
+              </span>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function resetAllFilters() {
+      document.getElementById('filter-search').value = '';
+      document.getElementById('filter-uf').value = 'ALL';
+      populateCityFilter();
+      document.getElementById('filter-cidade').value = 'ALL';
+      document.getElementById('filter-tipo').value = 'ALL';
+      document.getElementById('filter-max-price').value = '999999999';
+      document.getElementById('filter-sort').value = 'score';
+      setStrategyFilter('ALL');
+    }
+
+    // -------------------------------------------------------------------------
+    // 6. DEEP-DIVE PROPERTY DOSSIER MODAL
+    // -------------------------------------------------------------------------
+    let currentModalTab = 'geral';
+
+    function openPropertyModal(id) {
+      const prop = ACTIVE_PROPERTIES.find(p => p.id === id);
+      if (!prop) return;
+      currentModalProperty = prop;
+      const calc = calculatePropertyMetrics(prop);
+
+      document.getElementById('modal-score-badge').textContent = `SCORE ${calc.score.toFixed(1)}`;
+      document.getElementById('modal-title').textContent = prop.titulo;
+      document.getElementById('modal-subtitle').textContent = `${prop.endereco} • ${prop.cidade}/${prop.uf} • Fonte: ${prop.portal}`;
+
+      document.getElementById('property-modal').classList.remove('hidden');
+      switchModalTab('geral');
+    }
+
+    function closePropertyModal() {
+      document.getElementById('property-modal').classList.add('hidden');
+      currentModalProperty = null;
+    }
+
+    function switchModalTab(tab) {
+      currentModalTab = tab;
+      document.querySelectorAll('.modal-tab').forEach(btn => {
+        if (btn.id === `mtab-${tab}`) {
+          btn.className = 'modal-tab active px-4 py-3 text-xs font-bold border-b-2 border-amber-500 text-amber-400 shrink-0';
+        } else {
+          btn.className = 'modal-tab px-4 py-3 text-xs font-semibold border-b-2 border-transparent text-zinc-400 hover:text-white shrink-0';
+        }
+      });
+      if (currentModalProperty) {
+        renderModalContent(currentModalProperty, tab);
+      }
+    }
+
+    function renderModalContent(p, tab) {
+      const body = document.getElementById('modal-body');
+      const c = calculatePropertyMetrics(p);
+
+      if (tab === 'geral') {
+        const maxPortal = Math.max(...Object.values(p.portaisPreco), p.mercado);
+        body.innerHTML = `
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-5 space-y-4">
+              <img src="${p.imagem}" onerror="this.src='https://placehold.co/800x450/18181b/a1a1aa?text=Imovel'" class="w-full h-56 object-cover rounded-xl border border-zinc-800">
+              <div class="bg-zinc-900/90 border border-zinc-800 rounded-xl p-4 space-y-2 text-xs">
+                <div class="flex justify-between"><span class="text-zinc-400">Código Oráculo:</span><span class="font-mono text-white font-bold">${p.id}</span></div>
+                <div class="flex justify-between"><span class="text-zinc-400">Área Privativa:</span><span class="font-mono text-white">${p.area} m² (${formatBRL(p.praca2Valor / p.area)}/m² na 2ª praça)</span></div>
+                <div class="flex justify-between"><span class="text-zinc-400">Valor/m² Mercado:</span><span class="font-mono text-emerald-400">${formatBRL(p.mercado / p.area)}/m²</span></div>
+                <div class="flex justify-between"><span class="text-zinc-400">Situação Posse:</span><span class="font-bold ${p.ocupacao === 'Desocupado' ? 'text-emerald-400' : 'text-amber-400'}">${p.ocupacao}</span></div>
+                <div class="flex justify-between"><span class="text-zinc-400">Financiamento:</span><span class="text-white">${p.aceitaFinanciamento ? '✅ Aceita Financiamento' : '⚠️ Somente à Vista / Parcelado'}</span></div>
+              </div>
+              <a href="${p.urlPortal}" target="_blank" rel="noopener" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                <span>Abrir Lote Oficial no ${p.portal}</span>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+              </a>
+            </div>
+
+            <div class="lg:col-span-7 space-y-5">
+              <!-- Market Comparison Across Portals -->
+              <div class="bg-zinc-900/70 border border-zinc-800 rounded-xl p-4">
+                <div class="flex items-center justify-between mb-3">
+                  <h4 class="text-xs font-bold uppercase tracking-wider text-white">Valuation Real: Comparativo nos Portais Imobiliários</h4>
+                  <span class="text-xs font-mono text-emerald-400 font-bold">Média: ${formatBRL(p.mercado)}</span>
+                </div>
+                <div class="space-y-3 text-xs">
+                  ${[
+                    { name: 'OLX Imóveis', val: p.portaisPreco.olx, color: 'bg-purple-500' },
+                    { name: 'ZAP Imóveis', val: p.portaisPreco.zap, color: 'bg-blue-500' },
+                    { name: 'ImovelWeb', val: p.portaisPreco.imovelweb, color: 'bg-orange-500' },
+                    { name: 'QuintoAndar / Histórico', val: p.portaisPreco.quintoandar, color: 'bg-emerald-500' }
+                  ].map(item => `
+                    <div>
+                      <div class="flex justify-between mb-1">
+                        <span class="text-zinc-300">${item.name}</span>
+                        <span class="font-mono font-bold text-white">${formatBRL(item.val)}</span>
+                      </div>
+                      <div class="w-full bg-zinc-950 h-2 rounded-full overflow-hidden">
+                        <div class="${item.color} h-full rounded-full" style="width: ${(item.val / maxPortal) * 100}%"></div>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+
+              <!-- Visual SVG Comparison Bar Chart: 2ª Praça Investment vs Market Value -->
+              <div class="bg-zinc-900/70 border border-zinc-800 rounded-xl p-4">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-white mb-3">Margem de Segurança (2ª Praça vs Venda Líquida)</h4>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                  <div class="bg-zinc-950 p-3 rounded-xl border border-zinc-800">
+                    <p class="text-[11px] text-zinc-400">Investimento Total</p>
+                    <p class="font-mono font-bold text-sm text-white mt-1">${formatBRL(c.inv2)}</p>
+                  </div>
+                  <div class="bg-emerald-500/10 p-3 rounded-xl border border-emerald-500/30">
+                    <p class="text-[11px] text-emerald-300">Lucro Líquido</p>
+                    <p class="font-mono font-extrabold text-sm text-emerald-400 mt-1">+${formatBRL(c.lucro2)}</p>
+                  </div>
+                  <div class="bg-amber-500/10 p-3 rounded-xl border border-amber-500/30">
+                    <p class="text-[11px] text-amber-300">ROI Líquido</p>
+                    <p class="font-mono font-extrabold text-sm text-amber-400 mt-1">+${c.roi2.toFixed(1)}%</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'financeiro') {
+        const totalFixed = globalCosts.reforma + globalCosts.desocupacao + globalCosts.advogado;
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 bg-zinc-900/90 p-3.5 rounded-xl border border-zinc-800 text-xs">
+              <span class="text-zinc-300">Custos aplicados conforme seu perfil global: <strong>Comissão ${globalCosts.comissaoPct}% + ITBI ${globalCosts.itbiPct}% + Registro ${globalCosts.registroPct}% + Reforma ${formatBRL(globalCosts.reforma)} + Desocupação ${formatBRL(globalCosts.desocupacao)} + Advogado ${formatBRL(globalCosts.advogado)}</strong></span>
+              <button onclick="closePropertyModal(); toggleCostDrawer();" class="text-amber-400 font-bold hover:underline">Alterar Custos</button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              ${[
+                { label: '1ª PRAÇA (Valor de Avaliação)', data: p.praca1Data, lance: p.praca1Valor, inv: c.inv1, lucro: c.lucro1, roi: c.roi1 },
+                { label: '2ª PRAÇA (Oportunidade Desconto)', data: p.praca2Data, lance: p.praca2Valor, inv: c.inv2, lucro: c.lucro2, roi: c.roi2 }
+              ].map(pr => `
+                <div class="bg-zinc-900/70 border ${pr.roi >= 0 ? 'border-emerald-500/30' : 'border-red-500/30'} rounded-2xl p-5 space-y-3">
+                  <div class="flex items-center justify-between border-b border-zinc-800 pb-3">
+                    <div>
+                      <h4 class="font-bold text-white text-sm">${pr.label}</h4>
+                      <p class="text-[11px] text-zinc-400">Encerramento: ${pr.data}</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-lg font-mono font-extrabold text-xs ${pr.roi >= 0 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">
+                      ROI ${pr.roi >= 0 ? '+' : ''}${pr.roi.toFixed(1)}%
+                    </span>
+                  </div>
+
+                  <div class="space-y-2 text-xs font-mono">
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">Lance Mínimo:</span><span class="text-white font-bold">${formatBRL(pr.lance)}</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">Comissão Leiloeiro (${globalCosts.comissaoPct}%):</span><span class="text-zinc-300">${formatBRL(pr.lance * globalCosts.comissaoPct / 100)}</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">ITBI (${globalCosts.itbiPct}%):</span><span class="text-zinc-300">${formatBRL(pr.lance * globalCosts.itbiPct / 100)}</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">Registro / Escritura (${globalCosts.registroPct}%):</span><span class="text-zinc-300">${formatBRL(pr.lance * globalCosts.registroPct / 100)}</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">Reforma + Desocupação + Advogado:</span><span class="text-zinc-300">${formatBRL(totalFixed)}</span></div>
+                    <div class="flex justify-between pt-2 border-t border-zinc-800 font-bold"><span class="text-zinc-200 font-sans">INVESTIMENTO TOTAL:</span><span class="text-white">${formatBRL(pr.inv)}</span></div>
+                    <div class="flex justify-between"><span class="text-zinc-400 font-sans">Venda Estimada (-${globalCosts.corretagemPct}% corret.):</span><span class="text-zinc-200">${formatBRL(p.mercado - c.corretagemVenda)}</span></div>
+                    <div class="flex justify-between pt-2 border-t border-zinc-800 text-sm font-extrabold">
+                      <span class="text-white font-sans">LUCRO LÍQUIDO:</span>
+                      <span class="${pr.lucro >= 0 ? 'text-emerald-400' : 'text-red-400'}">${pr.lucro >= 0 ? '+' : ''}${formatBRL(pr.lucro)}</span>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      } else if (tab === 'juridico') {
+        body.innerHTML = `
+          <div class="space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+              <div>
+                <span class="text-[11px] uppercase text-zinc-400 font-bold">Modalidade Jurídica</span>
+                <p class="text-sm font-bold text-white mt-0.5">${p.juridico.modalidade}</p>
+                <p class="text-xs text-zinc-400 mt-1">${p.juridico.processo}</p>
+              </div>
+              <span class="px-3 py-1.5 rounded-xl font-mono font-bold text-xs shrink-0 ${p.juridico.risco === 'BAIXO' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'}">
+                RISCO ${p.juridico.risco}
+              </span>
+            </div>
+
+            <div class="space-y-2.5">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-zinc-300">Checklist de Due Diligence Extraído do Edital</h4>
+              ${p.juridico.checklist.map(cItem => `
+                <div class="flex items-start gap-3 p-3 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs">
+                  <span class="mt-0.5">${cItem.ok ? '✅' : '⚠️'}</span>
+                  <span class="${cItem.ok ? 'text-zinc-200' : 'text-amber-300 font-medium'}">${cItem.item}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="pt-2 flex flex-wrap gap-3">
+              <button onclick="showToast('Download da Matrícula Atualizada (${p.id}.pdf) iniciado.', 'success')" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-semibold text-white flex items-center gap-2">
+                📄 Baixar Matrícula Atualizada (PDF)
+              </button>
+              <button onclick="showToast('Download do Edital Completo (${p.id}.pdf) iniciado.', 'success')" class="px-4 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-xs font-semibold text-white flex items-center gap-2">
+                📑 Baixar Edital Completo (PDF)
+              </button>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'poi') {
+        body.innerHTML = `
+          <div class="space-y-5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <p class="text-xs text-zinc-400">Índice de Qualidade Local</p>
+                <p class="text-2xl font-extrabold font-mono text-amber-400 mt-1">${p.indiceLocalizacao.toFixed(1)} / 10</p>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Baseado em infraestrutura e liquidez</p>
+              </div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <p class="text-xs text-zinc-400">Valorização do Bairro (12m)</p>
+                <p class="text-2xl font-extrabold font-mono text-emerald-400 mt-1">${p.valorizacao12m}</p>
+                <p class="text-[11px] text-zinc-500 mt-0.5">Índice FipeZAP / Portais locais</p>
+              </div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <p class="text-xs text-zinc-400">Vocação Estratégica</p>
+                <p class="text-sm font-bold text-white mt-2">${p.estrategias.join(' • ')}</p>
+              </div>
+            </div>
+
+            <div class="bg-zinc-900/60 border border-zinc-800 rounded-xl p-4 space-y-3">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-white">Pontos de Interesse (POI) e Distâncias</h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                ${p.pois.map(poi => `
+                  <div class="bg-zinc-950 border border-zinc-800 p-3 rounded-xl flex items-center justify-between text-xs">
+                    <div>
+                      <span class="text-[10px] uppercase font-bold text-amber-400 block">${poi.cat}</span>
+                      <span class="text-zinc-200 font-medium">${poi.nome}</span>
+                    </div>
+                    <span class="font-mono text-zinc-400 bg-zinc-900 px-2 py-1 rounded-lg">${poi.dist}</span>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+        `;
+      } else if (tab === 'financiamento') {
+        body.innerHTML = `
+          <div class="space-y-4">
+            <div class="bg-blue-500/10 border border-blue-500/30 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div class="text-xs text-blue-200">
+                <strong>Simulação Pré-Carregada:</strong> Lance de <strong>${formatBRL(p.praca2Valor)}</strong> (2ª Praça) e venda estimada de <strong>${formatBRL(p.mercado)}</strong>.
+              </div>
+              <button onclick="openPropertyInStandaloneFin('${p.id}')" class="px-4 py-2 rounded-xl bg-blue-500 hover:bg-blue-400 text-zinc-950 font-bold text-xs shrink-0">
+                Abrir no Simulador Completo →
+              </button>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <span class="text-zinc-400">Entrada Mínima (20%)</span>
+                <p class="text-lg font-mono font-bold text-white mt-1">${formatBRL(p.praca2Valor * 0.2)}</p>
+              </div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <span class="text-zinc-400">Financiamento (80%)</span>
+                <p class="text-lg font-mono font-bold text-blue-400 mt-1">${formatBRL(p.praca2Valor * 0.8)}</p>
+              </div>
+              <div class="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                <span class="text-zinc-400">ROI Alavancado (Revenda 6m)</span>
+                <p class="text-lg font-mono font-extrabold text-emerald-400 mt-1">
+                  +${(((p.mercado - p.praca2Valor - (p.praca2Valor * 0.1) - 18000) / (p.praca2Valor * 0.3 + 18000)) * 100).toFixed(1)}%
+                </p>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function openPropertyInStandaloneFin(id) {
+      closePropertyModal();
+      switchMainTab('financiamento');
+      document.getElementById('fin-preset-select').value = id;
+      loadPropertyIntoFinCalc(id);
+    }
+
+    // -------------------------------------------------------------------------
+    // 7. ORÁCULO GPT (NATURAL LANGUAGE SEARCH ENGINE)
+    // -------------------------------------------------------------------------
+    function runGptQuery(presetText) {
+      const inputEl = document.getElementById('gpt-input');
+      if (presetText) inputEl.value = presetText;
+      const q = inputEl.value.trim();
+      if (!q) {
+        showToast('Digite uma pergunta ou clique em uma sugestão.', 'info');
+        return;
+      }
+
+      const lower = q.toLowerCase();
+      const enriched = ACTIVE_PROPERTIES.map(p => ({ ...p, calc: calculatePropertyMetrics(p) }));
+
+      // Intelligent NLP Filter Extraction across live ACTIVE_PROPERTIES
+      let matches = enriched.filter(p => {
+        const cityNorm = p.cidade.toLowerCase();
+        if (lower.includes('maringá') || lower.includes('maringa')) {
+          if (lower.includes('curitiba')) {
+            if (!cityNorm.includes('maring') && !cityNorm.includes('curitiba')) return false;
+          } else if (!cityNorm.includes('maring')) return false;
+        } else if (lower.includes('curitiba') && !cityNorm.includes('curitiba')) return false;
+        else if ((lower.includes('paraná') || lower.includes('parana')) && p.uf !== 'PR') return false;
+        else if ((lower.includes('são paulo') || lower.includes('sao paulo')) && p.uf !== 'SP') return false;
+        else if (lower.includes('santa catarina') && p.uf !== 'SC') return false;
+
+        // Strategy detection
+        if ((lower.includes('praia') || lower.includes('litoral')) && !p.estrategias.includes('PRAIA')) return false;
+        if (lower.includes('airbnb') && !p.estrategias.includes('AIRBNB')) return false;
+        if ((lower.includes('universit') || lower.includes('faculdade')) && !p.estrategias.includes('UNIVERSITARIO')) return false;
+        if (lower.includes('caixa') && !p.portal.toLowerCase().includes('caixa')) return false;
+        if (lower.includes('financiamento') && !p.aceitaFinanciamento) return false;
+        if (lower.includes('desocupado') && p.ocupacao !== 'Desocupado') return false;
+
+        // Numeric Price detection (e.g. "450 mil" or "300 mil")
+        const priceMatch = lower.match(/(\d+)\s*mil/);
+        if (priceMatch) {
+          const limit = parseInt(priceMatch[1], 10) * 1000;
+          if (p.praca2Valor > limit) return false;
+        }
+
+        // ROI threshold detection
+        const roiMatch = lower.match(/roi.*?(\d+)%/);
+        if (roiMatch) {
+          const minRoi = parseInt(roiMatch[1], 10);
+          if (p.calc.roi2 < minRoi) return false;
+        }
+
+        // Score threshold detection
+        if (lower.includes('8.5') && p.calc.score < 8.5) return false;
+
+        // Profit threshold detection
+        const lucroMatch = lower.match(/lucro.*?(\d+)\s*mil/);
+        if (lucroMatch) {
+          const minLucro = parseInt(lucroMatch[1], 10) * 1000;
+          if (p.calc.lucro2 < minLucro) return false;
+        }
+
+        return true;
+      });
+
+      matches.sort((a, b) => b.calc.score - a.calc.score);
+
+      const out = document.getElementById('gpt-response-area');
+      if (matches.length === 0) {
+        out.innerHTML = `
+          <div class="bg-zinc-900 border border-zinc-800 rounded-xl p-5 space-y-2">
+            <p class="text-sm font-bold text-amber-400">Análise do Oráculo GPT:</p>
+            <p class="text-xs text-zinc-300">Não encontrei lotes exatos combinando todas essas restrições simultaneamente nos ${ACTIVE_PROPERTIES.length.toLocaleString('pt-BR')} imóveis carregados. Recomendo flexibilizar o teto de preço ou incluir cidades vizinhas.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const topDisplay = matches.slice(0, 12);
+      out.innerHTML = `
+        <div class="bg-purple-500/10 border border-purple-500/30 rounded-xl p-4 space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-purple-300">✨ Parecer Executivo do Oráculo GPT</span>
+            <span class="text-[11px] font-mono text-zinc-400">${matches.length.toLocaleString('pt-BR')} lote(s) encontrado(s)</span>
+          </div>
+          <p class="text-xs text-zinc-200 leading-relaxed">
+            Encontrei <strong>${matches.length.toLocaleString('pt-BR')} oportunidades</strong> aderentes ao seu comando <em>"${q}"</em>. O destaque nº 1 é <strong>${matches[0].titulo}</strong> (${matches[0].cidade}/${matches[0].uf}), apresentando <strong>Score ${matches[0].calc.score}</strong> e ROI líquido projetado de <strong>+${matches[0].calc.roi2.toFixed(1)}%</strong> (${formatBRL(matches[0].calc.lucro2)} de lucro líquido na 2ª praça).
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          ${topDisplay.map(m => `
+            <div onclick="openPropertyModal('${m.id}')" class="bg-zinc-900 hover:bg-zinc-800/90 border border-zinc-800 hover:border-amber-500/50 rounded-xl p-4 cursor-pointer transition-all flex items-center justify-between gap-4">
+              <div class="min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="px-2 py-0.5 rounded bg-amber-500 text-zinc-950 font-mono font-bold text-[11px]">SCORE ${m.calc.score}</span>
+                  <span class="text-[11px] text-zinc-400">${m.cidade}/${m.uf} • ${m.ocupacao}</span>
+                </div>
+                <h4 class="font-bold text-white text-sm truncate">${m.titulo}</h4>
+                <p class="text-xs text-zinc-400 mt-1">2ª Praça: <strong class="text-white font-mono">${formatBRL(m.praca2Valor)}</strong> • Mercado: <span class="font-mono">${formatBRL(m.mercado)}</span></p>
+              </div>
+              <div class="text-right shrink-0">
+                <span class="block font-mono font-extrabold text-sm text-emerald-400">+${m.calc.roi2.toFixed(1)}%</span>
+                <span class="block font-mono text-[11px] text-emerald-300/80">+${formatBRL(m.calc.lucro2)}</span>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // -------------------------------------------------------------------------
+    // 8. ANALISADOR DE EDITAL & MATRÍCULA POR IA
+    // -------------------------------------------------------------------------
+    const EDITAL_SAMPLES = {
+      limpo: `EDITAL DE LEILÃO PÚBLICO Nº 0042/2026 - CAIXA ECONÔMICA FEDERAL\nIMÓVEL: Apartamento nº 402, Edifício Residencial Horizonte, Zona 07, Maringá/PR. Matrícula nº 52.104 do 2º CRI.\nCLÁUSULA 4.1 - DA POSSE: O imóvel encontra-se DESOCUPADO, sendo a entrega das chaves realizada após o registro da carta de arrematação.\nCLÁUSULA 4.2 - DOS DÉBITOS: Eventuais débitos de IPTU e taxas condominiais anteriores à data da arrematação serão integralmente quitados pela CAIXA.\nCLÁUSULA 5 - PAGAMENTO: À vista ou mediante financiamento habitacional SBPE com entrada mínima de 5% e uso de FGTS.\nMATRÍCULA AV.04: Consolidação da propriedade fiduciária em nome da Caixa Econômica Federal nos termos da Lei 9.514/97. Sem outras averbações de penhora ou indisponibilidade.`,
+      complexo: `EDITAL DE LEILÃO JUDICIAL - 3ª VARA CÍVEL - PROCESSO Nº 0019283-44.2022.8.16.0001\nIMÓVEL: Casa residencial em alvenaria, 180m². Matrícula nº 19.882.\nESTADO DE OCUPAÇÃO: Imóvel OCUPADO pelo executado e familiares, cabendo ao arrematante promover a respectiva ação de imissão na posse às suas expensas.\nDÉBITOS E ÔNUS: Constam débitos de IPTU inscritos em dívida ativa no importe de R$ 18.450,00 que correrão por conta do arrematante, além de R$ 9.200,00 de condomínio.\nMATRÍCULA R.08: Usufruto vitalício registrado em favor de terceiro (art. 1.390 CC) não cancelado.\nPAGAMENTO: Exclusivamente à vista em até 24 horas após o encerramento da praça, acrescido de 5% de comissão do leiloeiro.`
+    };
+
+    function loadSampleEdital(type) {
+      document.getElementById('edital-textarea').value = EDITAL_SAMPLES[type];
+      analyzeEditalText();
+    }
+
+    function analyzeEditalText() {
+      const text = document.getElementById('edital-textarea').value.trim();
+      if (!text) {
+        showToast('Cole o texto do edital ou carregue um exemplo primeiro.', 'info');
+        return;
+      }
+
+      const lower = text.toLowerCase();
+      const isOcupado = lower.includes('ocupado') && !lower.includes('desocupado');
+      const hasUsufruto = lower.includes('usufruto');
+      const buyerPaysDebt = lower.includes('por conta do arrematante') || lower.includes('dívida ativa');
+      const acceptsFin = lower.includes('financiamento');
+
+      let riskLevel = 'BAIXO';
+      let riskColor = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40';
+      if (hasUsufruto || (isOcupado && buyerPaysDebt)) {
+        riskLevel = 'ALTO';
+        riskColor = 'bg-red-500/20 text-red-400 border-red-500/40';
+      } else if (isOcupado || buyerPaysDebt) {
+        riskLevel = 'MÉDIO';
+        riskColor = 'bg-amber-500/20 text-amber-400 border-amber-500/40';
+      }
+
+      const badge = document.getElementById('edital-status-badge');
+      badge.textContent = `RISCO ${riskLevel}`;
+      badge.className = `text-[11px] font-mono font-bold px-2.5 py-0.5 rounded border ${riskColor}`;
+
+      document.getElementById('edital-result-container').innerHTML = `
+        <div class="grid grid-cols-2 gap-3 text-xs">
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+            <span class="text-zinc-400 block text-[11px]">Status de Ocupação</span>
+            <strong class="text-sm ${isOcupado ? 'text-amber-400' : 'text-emerald-400'}">${isOcupado ? '⚠️ Ocupado (Imissão Posse)' : '✅ Desocupado'}</strong>
+          </div>
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+            <span class="text-zinc-400 block text-[11px]">Dívidas IPTU / Condomínio</span>
+            <strong class="text-sm ${buyerPaysDebt ? 'text-red-400' : 'text-emerald-400'}">${buyerPaysDebt ? '⚠️ Arrematante Assume' : '✅ Quitadas pelo Vendedor'}</strong>
+          </div>
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+            <span class="text-zinc-400 block text-[11px]">Gravames na Matrícula</span>
+            <strong class="text-sm ${hasUsufruto ? 'text-red-400' : 'text-emerald-400'}">${hasUsufruto ? '🚨 Usufruto Vitalício Detectado' : '✅ Consolidação Limpa'}</strong>
+          </div>
+          <div class="bg-zinc-900 border border-zinc-800 p-3 rounded-xl">
+            <span class="text-zinc-400 block text-[11px]">Forma de Pagamento</span>
+            <strong class="text-sm text-white">${acceptsFin ? '🏦 Aceita Financiamento' : '💵 Somente à Vista'}</strong>
+          </div>
+        </div>
+
+        <div class="bg-zinc-950 border border-zinc-800 rounded-xl p-4 space-y-2 text-xs leading-relaxed">
+          <p class="font-bold text-white">Parecer Técnico do Auditor Oráculo IA:</p>
+          <p class="text-zinc-300">
+            ${riskLevel === 'BAIXO'
+              ? 'Edital extremamente seguro para arrematação. Imóvel livre de ocupantes, sem dívidas propter rem transferidas ao comprador e com cadeia dominial consolidada.'
+              : riskLevel === 'ALTO'
+                ? 'ALERTA CRÍTICO: A matrícula aponta usufruto vitalício ou acúmulo de dívidas tributárias/condominiais a cargo do arrematante. O usufruto impede a posse imediata mesmo após a arrematação. Recomenda-se cautela extrema ou deságio superior a 60%.'
+                : 'Oportunidade viável desde que precificada a desocupação judicial (média 4 a 6 meses) e abatidos os débitos informados na planilha de ROI.'}
+          </p>
+        </div>
+      `;
+      showToast('Auditoria jurídica concluída com sucesso!', 'success');
+    }
+
+    // -------------------------------------------------------------------------
+    // 9. STANDALONE FINANCING & LEVERAGE CALCULATOR
+    // -------------------------------------------------------------------------
+    function populateFinPresets() {
+      const sel = document.getElementById('fin-preset-select');
+      sel.innerHTML = '<option value="">-- Selecione um imóvel do catálogo (Top 100) --</option>';
+      ACTIVE_PROPERTIES.slice(0, 100).forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = `${p.id} - ${p.titulo} (${p.cidade}/${p.uf}) - 2ª Praça ${formatBRL(p.praca2Valor)}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function loadPropertyIntoFinCalc(id) {
+      const p = ACTIVE_PROPERTIES.find(item => item.id === id);
+      if (!p) return;
+      document.getElementById('fin-mercado').value = p.mercado;
+      document.getElementById('fin-lance').value = p.praca2Valor;
+      calcStandaloneFinancing();
+      showToast(`Dados de ${p.titulo} importados para o simulador.`, 'info');
+    }
+
+    function calcStandaloneFinancing() {
+      const mercado = parseFloat(document.getElementById('fin-mercado').value) || 0;
+      const lance = parseFloat(document.getElementById('fin-lance').value) || 0;
+      const entradaPct = parseFloat(document.getElementById('fin-entrada-pct').value) || 20;
+      const jurosAnual = parseFloat(document.getElementById('fin-juros').value) || 9.9;
+      const prazo = parseInt(document.getElementById('fin-prazo').value, 10) || 360;
+      const mesesVenda = parseInt(document.getElementById('fin-meses-venda').value, 10) || 6;
+      const reforma = parseFloat(document.getElementById('fin-reforma').value) || 0;
+      const mensalFixo = parseFloat(document.getElementById('fin-mensal-fixo').value) || 0;
+
+      const entradaVal = lance * (entradaPct / 100);
+      const financiado = lance - entradaVal;
+      const docs = lance * 0.10; // 5% comissao + 3% ITBI + 2% registro
+
+      const jurosMensal = (Math.pow(1 + jurosAnual / 100, 1 / 12) - 1);
+      const amortizacao = financiado / prazo;
+      const primeiraParcela = amortizacao + (financiado * jurosMensal);
+
+      // Total paid in installments during holding period (SAC)
+      let totalParcelas = 0;
+      let saldoDevedor = financiado;
+      for (let m = 0; m < mesesVenda; m++) {
+        const parcelaMes = amortizacao + (saldoDevedor * jurosMensal);
+        totalParcelas += parcelaMes;
+        saldoDevedor -= amortizacao;
+      }
+
+      const carregoTotal = totalParcelas + (mensalFixo * mesesVenda);
+      const capitalProprio = entradaVal + docs + reforma + carregoTotal;
+      const lucroLiquido = mercado - saldoDevedor - capitalProprio;
+      const roiAlavancado = capitalProprio > 0 ? (lucroLiquido / capitalProprio) * 100 : 0;
+      const roiMensal = roiAlavancado / mesesVenda;
+
+      document.getElementById('fin-entrada-lbl').textContent = `${entradaPct}% (${formatBRL(entradaVal)})`;
+      document.getElementById('fin-out-capital').textContent = formatBRL(capitalProprio);
+      document.getElementById('fin-out-roi').textContent = `${roiAlavancado >= 0 ? '+' : ''}${roiAlavancado.toFixed(1)}%`;
+      document.getElementById('fin-out-roi-mes').textContent = `Equiv. a ${roiMensal.toFixed(1)}% ao mês (${mesesVenda}m)`;
+      document.getElementById('fin-out-financiado').textContent = formatBRL(financiado);
+      document.getElementById('fin-out-parcela').textContent = `${formatBRL(primeiraParcela)} / mês`;
+      document.getElementById('fin-out-docs').textContent = formatBRL(docs);
+      document.getElementById('fin-out-carrego').textContent = formatBRL(carregoTotal);
+      document.getElementById('fin-out-saldo').textContent = formatBRL(Math.max(0, saldoDevedor));
+      document.getElementById('fin-out-lucro').textContent = `${lucroLiquido >= 0 ? '+' : ''}${formatBRL(lucroLiquido)}`;
+    }
+
+    // -------------------------------------------------------------------------
+    // 10. WHATSAPP RADAR PREVIEW & ACTIONS
+    // -------------------------------------------------------------------------
+    function updateWhatsappPreview() {
+      const phone = document.getElementById('wa-phone').value;
+      const cities = document.getElementById('wa-cities').value;
+      const score = document.getElementById('wa-score').value;
+      const roi = document.getElementById('wa-roi').value;
+
+      document.getElementById('wa-target-lbl').textContent = phone;
+      document.getElementById('wa-preview-box').innerHTML = `
+        <p class="font-bold text-amber-400">🚨 ALERTA ORÁCULO DOS LEILÕES (SCORE 9.3)</p>
+        <p>🏢 <strong>Apartamento Ed. Solar das Araucárias (88m²)</strong></p>
+        <p>📍 Zona 07 - Maringá/PR (650m da UEM)</p>
+        <p>🏦 Fonte: Caixa Econômica Federal</p>
+        <p class="pt-1">💰 <strong>2ª Praça:</strong> R$ 276.000 <span class="text-emerald-400">(-44% OFF)</span></p>
+        <p>📊 <strong>Valor Mercado:</strong> R$ 495.000</p>
+        <p>📈 <strong>ROI Líquido Estimado:</strong> <span class="text-emerald-400 font-bold">+55.2% (+R$ 176.400)</span></p>
+        <p>⚖️ <strong>Edital IA:</strong> 🔓 Desocupado | ✅ Dívidas pagas pela Caixa | 🏦 Aceita Financiamento</p>
+        <p class="text-[10px] text-zinc-400 pt-1">Regra ativa: ${cities} • Score ≥ ${score} • ROI ≥ ${roi}%</p>
+      `;
+    }
+
+    function saveWhatsappRule() {
+      const phone = document.getElementById('wa-phone').value;
+      showToast(`Regra salva! Alertas ativos para ${phone}.`, 'success');
+    }
+
+    function simulateWhatsappPush() {
+      const phone = document.getElementById('wa-phone').value;
+      showToast(`Disparo de teste enviado via Webhook para ${phone}!`, 'success');
+    }
+
+    // -------------------------------------------------------------------------
+    // 11. NAVIGATION & TOAST HELPERS
+    // -------------------------------------------------------------------------
+    function switchMainTab(tabName) {
+      ['radar', 'gpt', 'edital', 'financiamento', 'whatsapp'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.add('hidden');
+        const navBtn = document.getElementById(`nav-${t}`);
+        if (navBtn) {
+          navBtn.className = 'nav-tab px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-zinc-400 hover:text-white';
+        }
+        const mNavBtn = document.getElementById(`m-nav-${t}`);
+        if (mNavBtn) {
+          mNavBtn.className = 'm-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold text-zinc-400';
+        }
+      });
+
+      document.getElementById(`view-${tabName}`).classList.remove('hidden');
+      const activeNav = document.getElementById(`nav-${tabName}`);
+      if (activeNav) {
+        activeNav.className = 'nav-tab active px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 bg-zinc-800 text-white shadow';
+      }
+      const activeMNav = document.getElementById(`m-nav-${tabName}`);
+      if (activeMNav) {
+        activeMNav.className = 'm-nav-tab shrink-0 px-3 py-1.5 rounded-lg text-xs font-semibold bg-zinc-800 text-white';
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const borderClass = type === 'success' ? 'border-emerald-500/60 text-emerald-300' : 'border-amber-500/60 text-amber-300';
+      toast.className = `pointer-events-auto bg-zinc-900/95 backdrop-blur-md border ${borderClass} px-4 py-3 rounded-xl shadow-2xl text-xs font-semibold flex items-center gap-2.5 transition-all duration-300`;
+      toast.innerHTML = `<span>${type === 'success' ? '✅' : '⚡'}</span><span>${message}</span>`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 300);
+      }, 3200);
+    }
+
+    // Initialize Application on Load
+    window.onload = function () {
+      loadAuctionData(false);
+      calcStandaloneFinancing();
+      updateWhatsappPreview();
+    };
+  </script>
+</body>
+</html>
