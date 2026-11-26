@@ -1,0 +1,32 @@
+name: Atualizar Leiloes Brasil
+
+on:
+  schedule:
+    - cron: '0 */2 * * *' # Roda automaticamente a cada 2 horas
+  workflow_dispatch:      # Permite clicar em um botão para rodar na hora
+
+permissions:
+  contents: write
+
+jobs:
+  coletar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Executar robo coletor
+        run: node coletor.js
+
+      - name: Salvar imoveis.json atualizado
+        run: |
+          git config user.name "Oraculo Bot"
+          git config user.email "bot@oraculo.local"
+          git add imoveis.json
+          git commit -m "Atualizacao automatica de lotes" || exit 0
+          git push
