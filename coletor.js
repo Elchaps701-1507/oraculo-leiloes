@@ -1,12 +1,10 @@
 const fs = require('fs');
 const https = require('https');
-const http = require('http');
 
-const SCRAPER_API_KEY = (process.env.SCRAPER_API_KEY || '').trim();
-
-// Estados prioritários de alta liquidez (evita estourar créditos do plano gratuito)
-// Para varrer o Brasil todo, adicione as demais UFs na lista abaixo
-const ESTADOS = ['PR', 'SP', 'SC', 'MG', 'RS', 'RJ', 'GO', 'DF', 'BA', 'PE', 'CE', 'MS', 'MT'];
+const ESTADOS = [
+  'PR','SP','SC','MG','RS','RJ','GO','DF','BA','PE','CE','ES','MT','MS',
+  'PA','PB','RN','AL','SE','AM','MA','PI','RO','TO','AC','AP','RR'
+];
 
 const REGEX_BLACKLIST = /\b(sucata|materiais|material|ve[ií]culo|carro|moto|caminh[aã]o|empilhadeira|trator|colheitadeira|inform[aá]tica|computador|notebook|monitor|impressora|mobili[aá]rio|m[oó]veis|cadeira|mesa|arm[aá]rio|equipamento|maquin[aá]rio|m[aá]quina|ferro|aço|cabo|fio|pneu|roda|pe[cç]a|motor|gerador|transformador|eletr[oô]nico|eletrodom[eé]stico|celular|tv|televis[aã]o|roupa|cal[cç]ado|tecido|estoque|mercadoria|ferramenta|tubo|bomba|compressor|tanque|container|embarca[cç][aã]o|barco|lancha|aeronave)\b/i;
 const REGEX_IMOVEL_VALIDO = /\b(apartamento|apto|casa|sobrado|resid[eê]ncia|residencial|terreno|lote\s+urbano|lote\s+de\s+terreno|gleba|fazenda|s[ií]tio|ch[aá]cara|im[oó]vel|sala\s+comercial|loja|galp[aã]o|pr[eé]dio|edif[ií]cio|cobertura|kitnet|flat|vaga\s+de\s+garagem|box\s+garagem|matr[ií]cula|alvenaria|pavimento)\b/i;
@@ -19,24 +17,20 @@ function ehImovelValido(texto) {
 
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
-function requisicaoHTTP(targetUrl, { encoding = 'utf8', usarProxy = false, premium = false } = {}) {
+function requisicaoDireta(targetUrl, encoding = 'utf8', headersExtras = {}) {
   return new Promise((resolve) => {
-    let finalUrl = targetUrl;
-    if (usarProxy && SCRAPER_API_KEY) {
-      const premParam = premium ? '&premium=true' : '';
-      finalUrl = `https://api.scraperapi.com/?api_key=${SCRAPER_API_KEY}&country_code=br${premParam}&url=${encodeURIComponent(targetUrl)}`;
-    }
-
-    const lib = finalUrl.startsWith('https') ? https : http;
-    const req = lib.get(finalUrl, {
+    const req = https.get(targetUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/128.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/json,text/csv,*/*'
+        'Accept': 'application/json,text/csv,text/html,*/*',
+        'Accept-Language': 'pt-BR,pt;q=0.9,en;q=0.8',
+        ...headersExtras
       },
-      timeout: 45000
+      timeout: 20000
     }, (res) => {
       if (res.statusCode !== 200) {
-        console.log(`[HTTP ${res.statusCode}] Falha ao acessar: ${targetUrl.slice(0, 70)}`);
+        console.log(`[HTTP ${res.statusCode}] ${targetUrl.slice(0, 75)}`);
+        res.resume();
         return resolve('');
       }
       const chunks = [];
@@ -44,15 +38,8 @@ function requisicaoHTTP(targetUrl, { encoding = 'utf8', usarProxy = false, premi
       res.on('end', () => resolve(Buffer.concat(chunks).toString(encoding)));
     });
 
-    req.on('error', (err) => {
-      console.log(`[ERRO REDE] ${err.message} em ${targetUrl.slice(0, 60)}`);
-      resolve('');
-    });
-    req.on('timeout', () => {
-      console.log(`[TIMEOUT] ${targetUrl.slice(0, 60)}`);
-      req.destroy();
-      resolve('');
-    });
+    req.on('error', () => resolve(''));
+    req.on('timeout', () => { req.destroy(); resolve(''); });
   });
 }
 
@@ -84,21 +71,22 @@ function detectarTipo(texto) {
   return 'Apartamento';
 }
 
-// 1. CAIXA ECONÔMICA FEDERAL (SEQUENCIAL + PREMIUM=TRUE PARA PASSAR WAF AKAMAI)
-async function coletarCaixa() {
-  if (!SCRAPER_API_KEY) {
-    console.log('[AVISO] SCRAPER_API_KEY ausente. Pulando Caixa para evitar bloqueio de IP.');
-    return [];
-  }
-
+// 1. CAIXA ECONÔMICA DIRETA (FUNCIONA SEM CHAVE QUANDO RODADO COM IP BRASIL / SEU PC)
+async function coletarCaixaDireta() {
   const resultados = [];
-  for (const uf of ESTADOS) {
+
+  for (let i = 0; i < ESTADOS.length; i++) {
+    const uf = ESTADOS[i];
     const url = `https://venda-imoveis.caixa.gov.br/listaweb/Lista_imoveis_${uf}.csv`;
-    const texto = await requisicaoHTTP(url, { encoding: 'latin1', usarProxy: true, premium: true });
+    const texto = await requisicaoDireta(url, 'latin1', {
+      'Referer': 'https://venda-imoveis.caixa.gov.br/sistema/download-lista.asp'
+    });
 
     if (!texto || !texto.includes(';')) {
-      console.log(`[Caixa ${uf}] Retorno vazio ou bloqueado`);
-      await esperar(1200);
+      if (i === 0) {
+        console.log('[Caixa] IP atual bloqueado pela Caixa (normal no GitHub EUA). Para baixar Caixa sem chave, rode "node coletor.js" no seu PC/VPS BR e importe o imoveis.json.');
+        break; // Aborta rápido sem perder tempo nos outros 26 estados
+      }
       continue;
     }
 
@@ -170,24 +158,26 @@ async function coletarCaixa() {
       countUF++;
     }
     console.log(`[Caixa ${uf}] ${countUF} imóveis extraídos`);
-    await esperar(1000); // Evita erro 429 de concorrência
   }
   return resultados;
 }
 
-// 2. SUPERBID EXCHANGE (BUSCA POR PALAVRAS-CHAVE IMOBILIÁRIAS DIRETAS NA API)
+// 2. SUPERBID EXCHANGE (API ABERTA DE IMÓVEIS — FUNCIONA DIRETO NO GITHUB ACTIONS SEM CHAVE)
 async function coletarSuperbidImoveis() {
-  const termos = ['apartamento', 'casa', 'terreno', 'imovel', 'galpao', 'sala comercial'];
   const resultados = [];
 
-  for (const termo of termos) {
-    const url = `https://offer-query.superbid.net/offers/?portalId=2&searchText=${encodeURIComponent(termo)}&pageNumber=1&pageSize=100`;
-    const raw = await requisicaoHTTP(url, { usarProxy: false });
-    if (!raw) continue;
+  for (let page = 1; page <= 15; page++) {
+    const url = `https://offer-query.superbid.net/offers/?portalId=2&filter=product.productType.id:2&pageNumber=${page}&pageSize=50&orderBy=price:asc`;
+    const raw = await requisicaoDireta(url, 'utf8', {
+      'Origin': 'https://www.superbid.net',
+      'Referer': 'https://www.superbid.net/'
+    });
+    if (!raw) break;
 
     try {
       const json = JSON.parse(raw);
       const ofertas = json.offers || [];
+      if (!ofertas.length) break;
 
       for (const o of ofertas) {
         const desc = o.product?.shortDesc || '';
@@ -240,18 +230,19 @@ async function coletarSuperbidImoveis() {
           resumoEdital: det || desc
         });
       }
-    } catch {}
-    await esperar(500);
+    } catch {
+      break;
+    }
+    await esperar(300);
   }
   console.log(`[Superbid Imóveis] ${resultados.length} imóveis válidos`);
   return resultados;
 }
 
 (async () => {
-  console.log(`=== INICIANDO COLETOR ORÁCULO ===`);
-  console.log(`SCRAPER_API_KEY configurada: ${SCRAPER_API_KEY ? 'SIM (tamanho ' + SCRAPER_API_KEY.length + ')' : 'NÃO'}`);
+  console.log('=== INICIANDO COLETOR ORÁCULO (MODO DIRETO SEM API KEY) ===');
 
-  const caixa = await coletarCaixa();
+  const caixa = await coletarCaixaDireta();
   const superbid = await coletarSuperbidImoveis();
 
   const bruto = [...caixa, ...superbid];
@@ -269,7 +260,7 @@ async function coletarSuperbidImoveis() {
 
   const saida = {
     atualizado_em: new Date().toISOString(),
-    status_coleta: unificados.length > 0 ? 'OK' : 'VAZIO_VERIFICAR_API_KEY',
+    status_coleta: unificados.length > 0 ? 'OK' : 'VAZIO',
     total_brasil_bruto: bruto.length,
     total_unificado: unificados.length,
     lotes: unificados.slice(0, 6000)
@@ -277,4 +268,5 @@ async function coletarSuperbidImoveis() {
 
   fs.writeFileSync('imoveis.json', JSON.stringify(saida));
   console.log(`=== FINALIZADO! Bruto: ${bruto.length} | Únicos: ${unificados.length} | Salvos: ${saida.lotes.length} ===`);
+  process.exit(0);
 })();
