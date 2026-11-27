@@ -2,8 +2,8 @@ name: Atualizar Leiloes Brasil
 
 on:
   schedule:
-    - cron: '0 */2 * * *' # Roda automaticamente a cada 2 horas
-  workflow_dispatch:      # Permite clicar em um botão para rodar na hora
+    - cron: '0 */4 * * *' # Roda a cada 4 horas
+  workflow_dispatch:      # Botão manual na aba Actions
 
 permissions:
   contents: write
