@@ -432,6 +432,20 @@
     let CUSTOS = { comissao: 5, itbi: 3, registro: 2, reforma: 10000, desocupacao: 3000, advogado: 2000, corretagem: 0 };
 
     const BRL = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    function fallbackImg(tipo) {
+  if (tipo === 'Casa') return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
+  if (tipo === 'Terreno') return 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=800';
+  if (tipo === 'Comercial') return 'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800';
+  return 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=800';
+}
+
+function linkSeguroEdital(l) {
+  if (l.id && l.id.startsWith('CX-')) {
+    const num = l.id.replace('CX-', '').replace(/\D/g, '').padStart(13, '0');
+    return `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${num}`;
+  }
+  return (l.url && l.url.startsWith('http')) ? l.url : `https://www.google.com/search?q=${encodeURIComponent(l.portal + ' ' + l.titulo + ' ' + l.cidade)}`;
+}
 
     function calcularFinanceiro(lote) {
       const venda = Number(lote.mercado || lote.avaliacao || 0);
@@ -636,7 +650,7 @@
           <article class="glass rounded-2xl overflow-hidden flex flex-col justify-between card-hover">
             <div>
               <div class="relative h-40 bg-slate-800">
-                <img src="${l.img}" alt="${l.titulo}" loading="lazy" class="w-full h-full object-cover opacity-85" />
+                <img src="${l.img || fallbackImg(l.tipo)}" onerror="this.onerror=null;this.src=fallbackImg('${l.tipo}');" alt="${l.titulo}" loading="lazy" class="w-full h-full object-cover opacity-90" />
                 <div class="absolute top-3 left-3 flex gap-1.5">
                   <span class="bg-slate-950/90 text-amber-400 border border-amber-500/40 text-xs font-extrabold px-2.5 py-1 rounded-lg">⭐ ${l.score.toFixed(1)}</span>
                   <span class="bg-emerald-500 text-slate-950 text-xs font-extrabold px-2.5 py-1 rounded-lg">-${fin.desconto}%</span>
@@ -678,7 +692,7 @@
               <button onclick="abrirDossie('${l.id}')" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition cursor-pointer">
                 Abrir Dossiê & ROI
               </button>
-              <a href="${l.url}" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl border border-slate-700 transition">
+              <a href="${linkSeguroEdital(l)}" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl border border-slate-700 transition">
                 Edital ↗
               </a>
             </div>
@@ -764,7 +778,7 @@
           </div>
 
           <div class="flex justify-end gap-3 pt-2">
-            <a href="${l.url}" target="_blank" rel="noopener" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl">
+            <a href="${linkSeguroEdital(l)}" target="_blank" rel="noopener" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl">
               Acessar Leiloeiro Oficial ↗
             </a>
           </div>
