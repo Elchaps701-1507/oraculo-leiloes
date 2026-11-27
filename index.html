@@ -505,7 +505,53 @@
       };
     }
 
-    async function carregarDados() {
+   async function carregarDados() {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      const cnt = document.getElementById('status-count');
+
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse';
+      txt.textContent = 'Sincronizando imoveis.json...';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+      try {
+        const resp = await fetch(`./imoveis.json?t=${Date.now()}`, {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        clearTimeout(timeoutId);
+
+        if (!resp.ok) throw new Error(`HTTP ${resp.status} ao buscar imoveis.json`);
+        const dados = await resp.json();
+        const listaBruta = Array.isArray(dados) ? dados : (dados.lotes || []);
+
+        if (!listaBruta.length) {
+          throw new Error('imoveis.json existe mas está vazio (0 lotes). Verifique o log do GitHub Actions.');
+        }
+
+        TODOS_LOTES = listaBruta.map(normalizarLote);
+        const dataAtualizacao = dados.atualizado_em ? new Date(dados.atualizado_em).toLocaleString('pt-BR') : 'Agora';
+
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400';
+        txt.textContent = `Sincronizado com base nacional • Atualizado: ${dataAtualizacao}`;
+        cnt.textContent = `${TODOS_LOTES.length.toLocaleString('pt-BR')} lotes ativos`;
+        document.getElementById('kpi-origem').textContent = 'Dados reais (GitHub Actions)';
+      } catch (e) {
+        clearTimeout(timeoutId);
+        console.warn('Fallback ativado:', e.message);
+        TODOS_LOTES = LOTES_DEMO.map(normalizarLote);
+        dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+        txt.textContent = `Modo Demonstração (${e.message})`;
+        cnt.textContent = `${TODOS_LOTES.length} lotes demo`;
+        document.getElementById('kpi-origem').textContent = 'Base demonstrativa local';
+      }
+
+      popularFiltrosGeograficos();
+      popularSelectSimulador();
+      aplicarFiltros();
+    }
       const dot = document.getElementById('status-dot');
       const txt = document.getElementById('status-text');
       const cnt = document.getElementById('status-count');
