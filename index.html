@@ -3,179 +3,125 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ORÁCULO DOS LEILÕES | Inteligência & ROI Imobiliário</title>
+  <title>ORÁCULO DOS LEILÕES | Inteligência & ROI</title>
   <style>
-    :root {
-      --bg: #090d16;
-      --surface: #0f172a;
-      --surface-2: #162035;
-      --border: #26334d;
-      --text: #f1f5f9;
-      --muted: #94a3b8;
-      --emerald: #10b981;
-      --emerald-dark: #059669;
-      --amber: #f59e0b;
-      --rose: #f43f5e;
-      --sky: #38bdf8;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.45;
-      min-height: 100vh;
-    }
-    a { color: inherit; text-decoration: none; }
-    button, input, select, textarea { font-family: inherit; }
+    body { margin: 0; font-family: Arial, sans-serif; background: #090d16; color: #f1f5f9; }
+    .top { background: #0f172a; padding: 14px 20px; border-bottom: 1px solid #26334d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .btn { background: #10b981; color: #03150e; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .btn-sec { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    .wrap { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
+    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
+    input, select { background: #0f172a; color: #fff; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .card { background: #0f172a; border: 1px solid #26334d; border-radius: 12px; padding: 16px; }
+    .tag { display: inline-block; background: #10b98122; color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
+    .price { font-size: 20px; font-weight: bold; margin: 10px 0 4px; color: #fff; }
+    .muted { color: #94a3b8; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <strong>ORÁCULO DOS LEILÕES</strong> — <span id="status" class="muted">Carregando...</span>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <label class="btn-sec">📂 Importar CSV Caixa / JSON <input type="file" accept=".csv,.json" onchange="lerArquivo(event)" style="display:none"></label>
+      <button class="btn" onclick="iniciar()">↻ Atualizar</button>
+    </div>
+  </div>
 
-    /* BARRA DE STATUS */
-    .status-bar {
-      background: #060911;
-      border-bottom: 1px solid var(--border);
-      padding: 8px 16px;
-      font-size: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-    }
-    .status-left { display: flex; align-items: center; gap: 8px; }
-    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); display: inline-block; }
-    .dot.ok { background: var(--emerald); }
-    .dot.demo { background: var(--sky); }
-    .status-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+  <div class="wrap">
+    <div class="filters">
+      <input id="q" placeholder="Buscar cidade, bairro ou título..." oninput="filtrar()" style="flex:1;min-width:200px;">
+      <select id="uf" onchange="filtrar()"><option value="">Todos os Estados</option></select>
+      <select id="ordem" onchange="filtrar()">
+        <option value="score">Maior Score</option>
+        <option value="menor">Menor Lance</option>
+      </select>
+    </div>
+    <div id="grid" class="grid"></div>
+  </div>
 
-    /* BOTÕES */
-    .btn {
-      background: var(--surface-2);
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: 0.15s;
-    }
-    .btn:hover { border-color: var(--emerald); }
-    .btn-primary {
-      background: var(--emerald);
-      border-color: var(--emerald);
-      color: #03150e;
-      font-weight: 700;
-    }
-    .btn-primary:hover { background: #34d399; }
-    .btn-sky { color: var(--sky); }
-    .btn-emerald { color: var(--emerald); }
+  <script>
+    const DEMO = [
+      { id: 'CX-01', titulo: 'Apartamento 2Q - Zona 07', cidade: 'Maringá', uf: 'PR', lance2: 198000, avaliacao: 340000, score: 9.4, portal: 'Caixa Online', url: 'https://venda-imoveis.caixa.gov.br/' },
+      { id: 'CX-02', titulo: 'Casa Residencial - Jd. Alvorada', cidade: 'Maringá', uf: 'PR', lance2: 275000, avaliacao: 480000, score: 9.1, portal: 'Kronberg Leilões', url: 'https://www.kronbergleiloes.com.br/' },
+      { id: 'SB-03', titulo: 'Apto Frente Mar - Meia Praia', cidade: 'Itapema', uf: 'SC', lance2: 410000, avaliacao: 680000, score: 9.3, portal: 'Superbid', url: 'https://www.superbid.net/' }
+    ];
+    let LOTES = [];
+    const BRL = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
 
-    /* HEADER */
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 30;
-      background: rgba(15, 23, 42, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-    }
-    .header-inner {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 12px 16px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .brand { display: flex; align-items: center; gap: 12px; }
-    .logo-box {
-      width: 38px; height: 38px; border-radius: 10px;
-      background: linear-gradient(135deg, #10b981, #0f766e);
-      color: #03150e; font-weight: 900; font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
-    .badge-pro {
-      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 5px;
-      background: rgba(16, 185, 129, 0.15); color: var(--emerald);
-      border: 1px solid rgba(16, 185, 129, 0.35);
-    }
-    .brand p { font-size: 11px; color: var(--muted); }
-
-    nav.tabs {
-      display: flex; flex-wrap: wrap; gap: 4px;
-      background: #080c15; padding: 4px; border-radius: 10px;
-      border: 1px solid var(--border);
-    }
-    .tab-btn {
-      background: transparent; border: none; color: var(--muted);
-      padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
-      cursor: pointer;
-    }
-    .tab-btn.active { background: var(--emerald); color: #03150e; font-weight: 700; }
-
-    /* PAINEL CUSTOS */
-    .costs-drawer {
-      display: none;
-      border-top: 1px solid var(--border);
-      background: #070b14;
-      padding: 16px;
-    }
-    .costs-drawer.open { display: block; }
-    .costs-inner { max-width: 1280px; margin: 0 auto; }
-    .costs-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 10px;
-      margin-top: 12px;
+    function montarUFs() {
+      const sel = document.getElementById('uf');
+      const ufs = [...new Set(LOTES.map(l => l.uf).filter(Boolean))].sort();
+      sel.innerHTML = '<option value="">Todos os Estados</option>' + ufs.map(u => `<option value="${u}">${u}</option>`).join('');
     }
 
-    /* CONTAINER PRINCIPAL */
-    main { max-width: 1280px; margin: 0 auto; padding: 20px 16px 60px; }
-    .view { display: none; }
-    .view.active { display: block; }
+    function filtrar() {
+      const q = document.getElementById('q').value.toLowerCase();
+      const uf = document.getElementById('uf').value;
+      const ord = document.getElementById('ordem').value;
+      let lista = LOTES.filter(l => (!uf || l.uf === uf) && (!q || `${l.titulo} ${l.cidade} ${l.portal}`.toLowerCase().includes(q)));
+      lista.sort((a, b) => ord === 'menor' ? a.lance2 - b.lance2 : b.score - a.score);
+      document.getElementById('grid').innerHTML = lista.slice(0, 60).map(l => {
+        const desc = l.avaliacao > 0 ? Math.round(((l.avaliacao - l.lance2) / l.avaliacao) * 100) : 0;
+        return `<div class="card">
+          <span class="tag">⭐ ${l.score} • -${desc}%</span>
+          <div class="muted" style="margin-top:8px;">${l.cidade}/${l.uf} • ${l.portal}</div>
+          <div style="font-weight:bold;font-size:15px;margin:4px 0;">${l.titulo}</div>
+          <div class="price">${BRL(l.lance2)}</div>
+          <div class="muted">Avaliação: ${BRL(l.avaliacao)}</div>
+          <div style="margin-top:12px;"><a href="${l.url}" target="_blank" class="btn" style="text-decoration:none;display:inline-block;">Ver Edital ↗</a></div>
+        </div>`;
+      }).join('');
+    }
 
-    /* KPIS */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
+    async function iniciar() {
+      const st = document.getElementById('status');
+      try {
+        const r = await fetch('./imoveis.json?t=' + Date.now(), { cache: 'no-store' });
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const d = await r.json();
+        const arr = Array.isArray(d) ? d : (d.lotes || []);
+        if (!arr.length) throw new Error('Base vazia');
+        LOTES = arr;
+        st.textContent = `Sincronizado (${LOTES.length} imóveis)`;
+      } catch (e) {
+        LOTES = DEMO;
+        st.textContent = `Modo Demo (${e.message})`;
+      }
+      montarUFs();
+      filtrar();
     }
-    .card-box {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
-    }
-    .kpi-label { font-size: 12px; color: var(--muted); }
-    .kpi-val { font-size: 24px; font-weight: 800; margin: 4px 0; }
-    .kpi-sub { font-size: 11px; color: var(--muted); }
 
-    /* TAGS */
-    .tags-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; }
-    .tag-btn {
-      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
-      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+    function lerArquivo(ev) {
+      const f = ev.target.files[0];
+      if (!f) return;
+      const rd = new FileReader();
+      rd.onload = e => {
+        const txt = e.target.result;
+        if (f.name.toLowerCase().endsWith('.csv')) {
+          LOTES = txt.split('\n').slice(4).map(linha => {
+            const c = linha.split(';').map(s => s.trim());
+            const p = parseFloat((c[5] || '0').replace(/\./g, '').replace(',', '.'));
+            const av = parseFloat((c[6] || '0').replace(/\./g, '').replace(',', '.'));
+            if (c.length < 10 || p <= 15000) return null;
+            const id13 = c[0].replace(/\D/g, '').padStart(13, '0');
+            return { id: 'CX-' + id13, titulo: (c[3] || c[2]) + ' - ' + (c[4] || ''), cidade: c[2], uf: c[1], lance2: p, avaliacao: av, score: 8.8, portal: 'Caixa', url: `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${id13}` };
+          }).filter(Boolean);
+          document.getElementById('status').textContent = `CSV Caixa carregado (${LOTES.length} imóveis)`;
+        } else {
+          const j = JSON.parse(txt);
+          LOTES = Array.isArray(j) ? j : (j.lotes || []);
+          document.getElementById('status').textContent = `JSON carregado (${LOTES.length} imóveis)`;
+        }
+        montarUFs();
+        filtrar();
+      };
+      rd.readAsText(f, f.name.toLowerCase().endsWith('.csv') ? 'ISO-8859-1' : 'UTF-8');
     }
-    .tag-btn.active { background: var(--emerald); border-color: var(--emerald); color: #03150e; font-weight: 700; }
 
-    /* FILTROS */
-    .filters-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    label.field-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
-    input[type="text"], input[type="number"], select, textarea {
-      width: 100%;
-      background: #080c15;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 8px
+    iniciar();
+  </script>
+</body>
+</html>
