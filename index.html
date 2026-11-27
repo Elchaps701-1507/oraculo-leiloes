@@ -130,7 +130,6 @@
 
     <!-- ================= ABA 1: RADAR DE OPORTUNIDADES ================= -->
     <section id="view-radar" class="space-y-6">
-      <!-- KPIs -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="glass rounded-2xl p-4">
           <p class="text-xs text-slate-400">Lotes Carregados</p>
@@ -154,7 +153,6 @@
         </div>
       </div>
 
-      <!-- SELEÇÕES ESPECIAIS (CHIPS) -->
       <div class="flex flex-wrap items-center gap-2">
         <span class="text-xs font-bold text-slate-400 mr-1">Seleções:</span>
         <button onclick="setTag('TODOS')" data-tag="TODOS" class="tag-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-500 text-slate-950 cursor-pointer">Todos os Imóveis</button>
@@ -167,7 +165,6 @@
         <button onclick="setTag('DESOCUPADO')" data-tag="DESOCUPADO" class="tag-btn px-3 py-1.5 rounded-full text-xs font-semibold bg-slate-800 text-slate-300 hover:bg-slate-700 cursor-pointer">🔓 Desocupado</button>
       </div>
 
-      <!-- BARRA DE FILTROS -->
       <div class="glass rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3">
         <div class="lg:col-span-2">
           <label class="block text-[11px] text-slate-400 mb-1">Buscar Bairro, Endereço ou Portal</label>
@@ -207,7 +204,6 @@
         </div>
       </div>
 
-      <!-- CONTADOR DE RESULTADOS -->
       <div class="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
         <p id="contador-resultados">Exibindo 0 oportunidades</p>
         <div class="flex items-center gap-4">
@@ -216,10 +212,8 @@
         </div>
       </div>
 
-      <!-- GRADE DE IMÓVEIS -->
       <div id="grid-lotes" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
 
-      <!-- BOTÃO CARREGAR MAIS -->
       <div id="box-carregar-mais" class="hidden text-center pt-2">
         <button onclick="carregarMaisLotes()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs px-6 py-3 rounded-xl transition cursor-pointer">
           Carregar mais lotes (+24)
@@ -351,7 +345,6 @@
   </div>
 
   <script>
-    // BASE DEMONSTRATIVA (FALLBACK SE NÃO HOUVER IMOVEIS.JSON)
     const LOTES_DEMO = [
       {
         id: 'DEMO-01',
@@ -379,7 +372,7 @@
         estrategias: ['UNIVERSITARIO', 'REVENDA'],
         indiceLocal: 9.1,
         score: 9.4,
-        img: 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=900&q=80',
+        img: '',
         portais: [
           { nome: 'ZAP Imóveis', faixa: 'R$ 355.000 - R$ 380.000' },
           { nome: 'OLX Paraná', faixa: 'R$ 345.000 - R$ 370.000' }
@@ -390,38 +383,37 @@
       },
       {
         id: 'DEMO-02',
-        titulo: 'Apartamento Vista Mar - Meia Praia',
-        tipo: 'Apartamento',
-        portal: 'Superbid Exchange',
-        url: 'https://www.superbid.net/',
-        uf: 'SC',
-        cidade: 'Itapema',
-        bairro: 'Meia Praia',
-        endereco: 'Rua 250, 310 - Meia Praia, Itapema - SC',
-        area: 84,
-        quartos: 2,
-        vagas: 1,
-        avaliacao: 680000,
-        mercado: 720000,
-        lance1: 680000,
+        titulo: 'Casa Residencial - Jardim Alvorada',
+        tipo: 'Casa',
+        portal: 'Kronberg Leilões (PR)',
+        url: 'https://www.kronbergleiloes.com.br/',
+        uf: 'PR',
+        cidade: 'Maringá',
+        bairro: 'Jardim Alvorada',
+        endereco: 'Rua Caracas, 420 - Jardim Alvorada, Maringá - PR',
+        area: 145,
+        quartos: 3,
+        vagas: 2,
+        avaliacao: 480000,
+        mercado: 510000,
+        lance1: 480000,
         data1: 'Encerrada',
-        lance2: 410000,
-        data2: 'Em aberto',
+        lance2: 275000,
+        data2: '2ª Praça Aberta',
         financia: false,
         ocupado: 'DESOCUPADO',
         dividas: 'VENDEDOR_BANCO',
         risco: 'BAIXO',
-        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA'],
-        indiceLocal: 9.5,
-        score: 9.2,
-        img: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=900&q=80',
+        estrategias: ['REVENDA'],
+        indiceLocal: 8.8,
+        score: 9.1,
+        img: '',
         portais: [
-          { nome: 'ZAP Imóveis', faixa: 'R$ 700.000 - R$ 750.000' },
-          { nome: 'VivaReal', faixa: 'R$ 690.000 - R$ 740.000' }
+          { nome: 'ZAP Imóveis', faixa: 'R$ 495.000 - R$ 530.000' }
         ],
-        pois: ['Orla da Meia Praia (180m)', 'Shopping Russi & Russi (400m)'],
-        processo: 'Leilão Extrajudicial • Livre de ônus',
-        resumoEdital: 'Apartamento mobiliado a 180 metros do mar, alto potencial de diárias no Airbnb.'
+        pois: ['Av. Pedro Taques (300m)', 'Colégio e Farmácia (150m)'],
+        processo: 'Leilão Judicial TJPR • Livre de ônus',
+        resumoEdital: 'Casa em alvenaria com edícula nos fundos, desocupada, pronta para reforma e revenda.'
       }
     ];
 
@@ -432,20 +424,26 @@
     let CUSTOS = { comissao: 5, itbi: 3, registro: 2, reforma: 10000, desocupacao: 3000, advogado: 2000, corretagem: 0 };
 
     const BRL = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
-    function fallbackImg(tipo) {
-  if (tipo === 'Casa') return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
-  if (tipo === 'Terreno') return 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=800';
-  if (tipo === 'Comercial') return 'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800';
-  return 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=800';
-}
 
-function linkSeguroEdital(l) {
-  if (l.id && l.id.startsWith('CX-')) {
-    const num = l.id.replace('CX-', '').replace(/\D/g, '').padStart(13, '0');
-    return `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${num}`;
-  }
-  return (l.url && l.url.startsWith('http')) ? l.url : `https://www.google.com/search?q=${encodeURIComponent(l.portal + ' ' + l.titulo + ' ' + l.cidade)}`;
-}
+    function fallbackImg(tipo) {
+      if (tipo === 'Casa') return 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800';
+      if (tipo === 'Terreno') return 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=800';
+      if (tipo === 'Comercial') return 'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800';
+      return 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=800';
+    }
+
+    function linkSeguroEdital(l) {
+      if (l.id && l.id.startsWith('CX-')) {
+        const num = l.id.replace('CX-', '').replace(/\D/g, '').padStart(13, '0');
+        return `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${num}`;
+      }
+      if (l.url && l.url.startsWith('http')) return l.url;
+      return `https://www.google.com/search?q=${encodeURIComponent(l.portal + ' ' + l.titulo + ' ' + l.cidade)}`;
+    }
+
+    function linkBuscaAlternativa(l) {
+      return `https://www.google.com/search?q=${encodeURIComponent('leilao ' + l.portal + ' ' + l.cidade + ' ' + l.endereco)}`;
+    }
 
     function calcularFinanceiro(lote) {
       const venda = Number(lote.mercado || lote.avaliacao || 0);
@@ -472,12 +470,13 @@ function linkSeguroEdital(l) {
       const avaliacao = Number(item.avaliacao || item.lance1 || item.lance2 || 100000);
       const lance2 = Number(item.lance2 || item.lance1 || avaliacao);
       const lance1 = Number(item.lance1 || avaliacao);
+      const tipo = String(item.tipo || 'Apartamento');
       return {
         id: String(item.id || `LOTE-${idx}`),
-        titulo: String(item.titulo || `${item.tipo || 'Imóvel'} - ${item.cidade || 'Brasil'}`),
-        tipo: String(item.tipo || 'Apartamento'),
+        titulo: String(item.titulo || `${tipo} - ${item.cidade || 'Brasil'}`),
+        tipo,
         portal: String(item.portal || 'Leilão Oficial'),
-        url: String(item.url || '#'),
+        url: String(item.url || ''),
         uf: String(item.uf || 'PR').toUpperCase(),
         cidade: String(item.cidade || 'Não informada'),
         bairro: String(item.bairro || 'Centro'),
@@ -498,7 +497,7 @@ function linkSeguroEdital(l) {
         estrategias: Array.isArray(item.estrategias) ? item.estrategias : ['REVENDA'],
         indiceLocal: Number(item.indiceLocal || 8.0),
         score: Number(item.score || 7.5),
-        img: String(item.img || 'https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=900&q=80'),
+        img: String(item.img || ''),
         portais: Array.isArray(item.portais) ? item.portais : [{ nome: 'Avaliação Oficial', faixa: BRL(avaliacao) }],
         pois: Array.isArray(item.pois) ? item.pois : ['Infraestrutura urbana'],
         processo: String(item.processo || 'Consulte edital'),
@@ -506,7 +505,7 @@ function linkSeguroEdital(l) {
       };
     }
 
-    async function carregarDados(forcar = false) {
+    async function carregarDados() {
       const dot = document.getElementById('status-dot');
       const txt = document.getElementById('status-text');
       const cnt = document.getElementById('status-count');
@@ -645,12 +644,14 @@ function linkSeguroEdital(l) {
         const fin = calcularFinanceiro(l);
         const corRoi2 = fin.roi2 >= 0 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : 'text-rose-400 bg-rose-500/10 border-rose-500/30';
         const corRoi1 = fin.roi1 >= 0 ? 'text-emerald-400' : 'text-rose-400';
+        const imgSrc = l.img || fallbackImg(l.tipo);
+        const urlEdital = linkSeguroEdital(l);
 
         return `
           <article class="glass rounded-2xl overflow-hidden flex flex-col justify-between card-hover">
             <div>
               <div class="relative h-40 bg-slate-800">
-                <img src="${l.img || fallbackImg(l.tipo)}" onerror="this.onerror=null;this.src=fallbackImg('${l.tipo}');" alt="${l.titulo}" loading="lazy" class="w-full h-full object-cover opacity-90" />
+                <img src="${imgSrc}" onerror="this.onerror=null;this.src=fallbackImg('${l.tipo}');" alt="${l.titulo}" loading="lazy" class="w-full h-full object-cover opacity-90" />
                 <div class="absolute top-3 left-3 flex gap-1.5">
                   <span class="bg-slate-950/90 text-amber-400 border border-amber-500/40 text-xs font-extrabold px-2.5 py-1 rounded-lg">⭐ ${l.score.toFixed(1)}</span>
                   <span class="bg-emerald-500 text-slate-950 text-xs font-extrabold px-2.5 py-1 rounded-lg">-${fin.desconto}%</span>
@@ -692,7 +693,7 @@ function linkSeguroEdital(l) {
               <button onclick="abrirDossie('${l.id}')" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs py-2.5 rounded-xl transition cursor-pointer">
                 Abrir Dossiê & ROI
               </button>
-              <a href="${linkSeguroEdital(l)}" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl border border-slate-700 transition">
+              <a href="${urlEdital}" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs px-3 py-2.5 rounded-xl border border-slate-700 transition">
                 Edital ↗
               </a>
             </div>
@@ -748,6 +749,8 @@ function linkSeguroEdital(l) {
       const l = TODOS_LOTES.find(x => x.id === id);
       if (!l) return;
       const fin = calcularFinanceiro(l);
+      const urlEdital = linkSeguroEdital(l);
+      const urlBusca = linkBuscaAlternativa(l);
 
       document.getElementById('modal-conteudo').innerHTML = `
         <div class="space-y-4">
@@ -777,8 +780,11 @@ function linkSeguroEdital(l) {
             </div>
           </div>
 
-          <div class="flex justify-end gap-3 pt-2">
-            <a href="${linkSeguroEdital(l)}" target="_blank" rel="noopener" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl">
+          <div class="flex flex-wrap justify-end gap-3 pt-2">
+            <a href="${urlBusca}" target="_blank" rel="noopener" class="bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs px-4 py-2.5 rounded-xl">
+              Buscar Lote no Google ↗
+            </a>
+            <a href="${urlEdital}" target="_blank" rel="noopener" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs px-5 py-2.5 rounded-xl">
               Acessar Leiloeiro Oficial ↗
             </a>
           </div>
@@ -937,7 +943,6 @@ Destino: ${num} | Filtro: ${cid}
 🔓 Status: Desocupado • Aceita Financiamento`;
     }
 
-    // INICIALIZAÇÃO
     window.addEventListener('DOMContentLoaded', () => {
       calcularSimulador();
       atualizarPreviewWA();
