@@ -4,75 +4,178 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ORÁCULO DOS LEILÕES | Inteligência & ROI Imobiliário</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Inter', sans-serif; background-color: #090d16; color: #f1f5f9; }
-    .glass { background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px); border: 1px solid rgba(51, 65, 85, 0.75); }
-    .card-hover { transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease; }
-    .card-hover:hover { transform: translateY(-2px); border-color: #10b981; box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.16); }
-    ::-webkit-scrollbar { width: 8px; height: 8px; }
-    ::-webkit-scrollbar-track { background: #0f172a; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-  </style>
-</head>
-<body class="min-h-screen flex flex-col">
+    :root {
+      --bg: #090d16;
+      --surface: #0f172a;
+      --surface-2: #162035;
+      --border: #26334d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-dark: #059669;
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --sky: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font-family: inherit; }
 
-  <!-- BARRA DE STATUS DE SINCRONIZAÇÃO -->
-  <div id="status-banner" class="bg-slate-900 border-b border-slate-800 px-4 py-2 text-xs flex flex-wrap items-center justify-between gap-2">
-    <div class="flex items-center gap-2">
-      <span id="status-dot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
-      <span id="status-text" class="text-slate-300 font-medium">Iniciando motor de dados...</span>
-    </div>
-    <div class="flex flex-wrap items-center gap-2">
-      <span id="status-count" class="text-slate-400 mr-1"></span>
-      <label class="bg-slate-800 hover:bg-slate-700 text-sky-400 border border-slate-700 px-2.5 py-1 rounded font-semibold transition cursor-pointer">
-        📂 Importar JSON
-        <input type="file" accept=".json" onchange="importarArquivoManual(event)" class="hidden" />
-      </label>
-      <button type="button" onclick="carregarDados()" class="bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-2.5 py-1 rounded font-semibold transition cursor-pointer">
-        ↻ Sincronizar Agora
-      </button>
-    </div>
-  </div>
+    /* BARRA DE STATUS */
+    .status-bar {
+      background: #060911;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .status-left { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); display: inline-block; }
+    .dot.ok { background: var(--emerald); }
+    .dot.demo { background: var(--sky); }
+    .status-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 
-  <!-- HEADER PRINCIPAL -->
-  <header class="sticky top-0 z-30 glass border-b border-slate-800">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center font-extrabold text-slate-950 text-lg shadow-lg shadow-emerald-500/20">
-          O
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="font-extrabold text-lg tracking-tight text-white">ORÁCULO DOS LEILÕES</h1>
-            <span class="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">PRO IA</span>
-          </div>
-          <p class="text-xs text-slate-400">Inteligência & ROI de Leilões Imobiliários</p>
-        </div>
-      </div>
+    /* BOTÕES */
+    .btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: 0.15s;
+    }
+    .btn:hover { border-color: var(--emerald); }
+    .btn-primary {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #03150e;
+      font-weight: 700;
+    }
+    .btn-primary:hover { background: #34d399; }
+    .btn-sky { color: var(--sky); }
+    .btn-emerald { color: var(--emerald); }
 
-      <!-- NAVEGAÇÃO DE ABAS -->
-      <nav class="flex flex-wrap items-center gap-1.5 bg-slate-900/90 p-1 rounded-xl border border-slate-800">
-        <button type="button" onclick="mudarAba('radar')" id="tab-radar" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500 text-slate-950 transition cursor-pointer">
-          🎯 Radar de Oportunidades
-        </button>
-        <button type="button" onclick="mudarAba('gpt')" id="tab-gpt" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer">
-          🤖 Oráculo GPT
-        </button>
-        <button type="button" onclick="mudarAba('edital')" id="tab-edital" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer">
-          ⚖️ Analisador Edital IA
-        </button>
-        <button type="button" onclick="mudarAba('financiamento')" id="tab-financiamento" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer">
-          🏦 Financiamento
-        </button>
-        <button type="button" onclick="mudarAba('whatsapp')" id="tab-whatsapp" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white transition cursor-pointer">
-          📲 Radar WhatsApp
-        </button>
-      </nav>
+    /* HEADER */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo-box {
+      width: 38px; height: 38px; border-radius: 10px;
+      background: linear-gradient(135deg, #10b981, #0f766e);
+      color: #03150e; font-weight: 900; font-size: 18px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .badge-pro {
+      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 5px;
+      background: rgba(16, 185, 129, 0.15); color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .brand p { font-size: 11px; color: var(--muted); }
 
-      <!-- BOTÃO CUSTOS GLOBAIS -->
-      <button type="button" onclick="togglePainelCustos()" class="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-3 py-2 rounded-xl text-xs font-semibold text-white transition cursor-pointer">
-        <span>⚙️ Meus Custos Globais</span>
-        <span id="badge-custos" class="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-bold">10
+    nav.tabs {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      background: #080c15; padding: 4px; border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      background: transparent; border: none; color: var(--muted);
+      padding: 6px 12px; border-radius: 7px; font-size: 12px; font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active { background: var(--emerald); color: #03150e; font-weight: 700; }
+
+    /* PAINEL CUSTOS */
+    .costs-drawer {
+      display: none;
+      border-top: 1px solid var(--border);
+      background: #070b14;
+      padding: 16px;
+    }
+    .costs-drawer.open { display: block; }
+    .costs-inner { max-width: 1280px; margin: 0 auto; }
+    .costs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    /* CONTAINER PRINCIPAL */
+    main { max-width: 1280px; margin: 0 auto; padding: 20px 16px 60px; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* KPIS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .card-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .kpi-label { font-size: 12px; color: var(--muted); }
+    .kpi-val { font-size: 24px; font-weight: 800; margin: 4px 0; }
+    .kpi-sub { font-size: 11px; color: var(--muted); }
+
+    /* TAGS */
+    .tags-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .tag-btn {
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+      padding: 6px 12px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+    }
+    .tag-btn.active { background: var(--emerald); border-color: var(--emerald); color: #03150e; font-weight: 700; }
+
+    /* FILTROS */
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    label.field-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      background: #080c15;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px
