@@ -3,125 +3,1268 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ORÁCULO DOS LEILÕES | Inteligência & ROI</title>
+  <title>ORÁCULO DOS LEILÕES | Inteligência & ROI Imobiliário</title>
   <style>
-    body { margin: 0; font-family: Arial, sans-serif; background: #090d16; color: #f1f5f9; }
-    .top { background: #0f172a; padding: 14px 20px; border-bottom: 1px solid #26334d; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .btn { background: #10b981; color: #03150e; border: none; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    .btn-sec { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 14px; border-radius: 8px; font-weight: bold; cursor: pointer; }
-    .wrap { max-width: 1200px; margin: 20px auto; padding: 0 16px; }
-    .filters { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-    input, select { background: #0f172a; color: #fff; border: 1px solid #334155; padding: 8px 12px; border-radius: 8px; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
-    .card { background: #0f172a; border: 1px solid #26334d; border-radius: 12px; padding: 16px; }
-    .tag { display: inline-block; background: #10b98122; color: #10b981; padding: 3px 8px; border-radius: 6px; font-size: 12px; font-weight: bold; }
-    .price { font-size: 20px; font-weight: bold; margin: 10px 0 4px; color: #fff; }
-    .muted { color: #94a3b8; font-size: 13px; }
+    :root {
+      --bg: #070b14;
+      --surface: #0f172a;
+      --surface-2: #162035;
+      --surface-3: #1e293b;
+      --border: #26334d;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-glow: rgba(16, 185, 129, 0.16);
+      --amber: #f59e0b;
+      --rose: #f43f5e;
+      --sky: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+    button, input, select, textarea { font-family: inherit; }
+
+    /* BARRA DE STATUS SUPERIOR */
+    .status-bar {
+      background: #04070d;
+      border-bottom: 1px solid var(--border);
+      padding: 8px 16px;
+      font-size: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .status-left { display: flex; align-items: center; gap: 8px; }
+    .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--amber); display: inline-block; flex-shrink: 0; }
+    .dot.ok { background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
+    .dot.demo { background: var(--sky); }
+    .status-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    /* BOTÕES */
+    .btn {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 7px 13px;
+      border-radius: 9px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+    }
+    .btn:hover { border-color: var(--emerald); background: var(--surface-3); }
+    .btn-primary {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #02140d;
+      font-weight: 800;
+    }
+    .btn-primary:hover { background: #34d399; border-color: #34d399; }
+    .btn-sky { color: var(--sky); border-color: rgba(56, 189, 248, 0.35); }
+    .btn-emerald { color: var(--emerald); }
+
+    /* HEADER & NAVEGAÇÃO */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      background: rgba(15, 23, 42, 0.96);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .header-inner {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .logo-box {
+      width: 40px; height: 40px; border-radius: 11px;
+      background: linear-gradient(135deg, #10b981, #0f766e);
+      color: #02140d; font-weight: 900; font-size: 19px;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.25);
+    }
+    .brand h1 { font-size: 16px; font-weight: 800; letter-spacing: -0.3px; }
+    .badge-pro {
+      font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 5px;
+      background: var(--emerald-glow); color: var(--emerald);
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .brand p { font-size: 11px; color: var(--muted); }
+
+    nav.tabs {
+      display: flex; flex-wrap: wrap; gap: 4px;
+      background: #060a12; padding: 4px; border-radius: 11px;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      background: transparent; border: none; color: var(--muted);
+      padding: 7px 13px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: 0.15s;
+    }
+    .tab-btn:hover { color: var(--text); }
+    .tab-btn.active { background: var(--emerald); color: #02140d; font-weight: 800; }
+
+    /* PAINEL CUSTOS GLOBAIS */
+    .costs-drawer {
+      display: none;
+      border-top: 1px solid var(--border);
+      background: #060a12;
+      padding: 16px;
+    }
+    .costs-drawer.open { display: block; }
+    .costs-inner { max-width: 1320px; margin: 0 auto; }
+    .costs-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    /* LAYOUT PRINCIPAL */
+    main { max-width: 1320px; margin: 0 auto; padding: 20px 16px 64px; }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* CARDS & KPIS */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .card-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    .kpi-label { font-size: 12px; color: var(--muted); font-weight: 500; }
+    .kpi-val { font-size: 25px; font-weight: 800; margin: 4px 0; letter-spacing: -0.5px; }
+    .kpi-sub { font-size: 11px; color: var(--muted); }
+
+    /* TAGS ESTRATÉGICAS */
+    .tags-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-bottom: 16px; }
+    .tag-btn {
+      background: var(--surface-2); border: 1px solid var(--border); color: var(--muted);
+      padding: 6px 13px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: 0.15s;
+    }
+    .tag-btn:hover { border-color: var(--emerald); color: var(--text); }
+    .tag-btn.active { background: var(--emerald); border-color: var(--emerald); color: #02140d; font-weight: 800; }
+
+    /* FILTROS */
+    .filters-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    label.field-label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 4px; font-weight: 600; }
+    input[type="text"], input[type="number"], select, textarea {
+      width: 100%;
+      background: #060a12;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 11px;
+      border-radius: 9px;
+      font-size: 12px;
+    }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: var(--emerald); }
+
+    /* GRADE DE LOTES */
+    .lots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 18px;
+      margin-top: 14px;
+    }
+    .lot-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+    }
+    .lot-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--emerald);
+      box-shadow: 0 12px 26px -6px rgba(16, 185, 129, 0.16);
+    }
+    .lot-img-wrap {
+      position: relative;
+      height: 168px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      overflow: hidden;
+    }
+    .lot-img-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .badges-top {
+      position: absolute; top: 10px; left: 10px; right: 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 6px;
+    }
+    .badge-group { display: flex; gap: 6px; }
+    .badge-score {
+      background: rgba(7, 11, 20, 0.92); color: var(--amber);
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      padding: 3px 8px; border-radius: 7px; font-size: 11px; font-weight: 800;
+    }
+    .badge-disc {
+      background: var(--emerald); color: #02140d;
+      padding: 3px 8px; border-radius: 7px; font-size: 11px; font-weight: 800;
+    }
+    .badge-fin {
+      background: rgba(56, 189, 248, 0.9); color: #04131c;
+      padding: 3px 7px; border-radius: 6px; font-size: 10px; font-weight: 800;
+    }
+    .badge-portal {
+      position: absolute; bottom: 8px; left: 10px;
+      background: rgba(7, 11, 20, 0.9); color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 2px 8px; border-radius: 5px; font-size: 10px; font-weight: 600;
+    }
+    .lot-body { padding: 14px; }
+    .lot-loc { font-size: 11px; font-weight: 700; color: var(--emerald); text-transform: uppercase; }
+    .lot-title { font-size: 14px; font-weight: 700; margin: 3px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lot-meta { font-size: 11px; color: var(--muted); margin-bottom: 10px; }
+
+    .fin-box {
+      background: #060a12;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 10px 12px;
+      font-size: 12px;
+    }
+    .fin-row { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; }
+    .fin-row + .fin-row { border-top: 1px solid rgba(38, 51, 77, 0.65); margin-top: 4px; padding-top: 6px; }
+    .roi-pill {
+      padding: 4px 9px; border-radius: 8px; text-align: right;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--emerald);
+    }
+    .roi-pill.neg {
+      border-color: rgba(244, 63, 94, 0.35);
+      background: rgba(244, 63, 94, 0.1);
+      color: var(--rose);
+    }
+    .lot-footer { padding: 0 14px 14px; display: flex; gap: 8px; }
+    .lot-footer .btn-primary { flex: 1; justify-content: center; padding: 9px; }
+
+    /* MODAL DOSSIÊ */
+    .modal-bg {
+      display: none;
+      position: fixed; inset: 0; z-index: 60;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      padding: 16px;
+      overflow-y: auto;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-bg.open { display: flex; }
+    .modal-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 20px;
+    }
+    .two-col { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; }
+    .txt-emerald { color: var(--emerald); }
+    .txt-amber { color: var(--amber); }
+    .txt-rose { color: var(--rose); }
+    .txt-sky { color: var(--sky); }
   </style>
 </head>
 <body>
-  <div class="top">
-    <div>
-      <strong>ORÁCULO DOS LEILÕES</strong> — <span id="status" class="muted">Carregando...</span>
+
+  <!-- BARRA SUPERIOR DE DADOS E IMPORTAÇÃO -->
+  <div class="status-bar">
+    <div class="status-left">
+      <span id="status-dot" class="dot"></span>
+      <span id="status-text">Carregando base de dados...</span>
     </div>
-    <div style="display:flex;gap:8px;">
-      <label class="btn-sec">📂 Importar CSV Caixa / JSON <input type="file" accept=".csv,.json" onchange="lerArquivo(event)" style="display:none"></label>
-      <button class="btn" onclick="iniciar()">↻ Atualizar</button>
+    <div class="status-actions">
+      <span id="status-count" style="color: var(--muted); font-weight: 600;"></span>
+      <label class="btn btn-sky" title="Selecione um ou mais arquivos CSV da Caixa (PR, SP, SC...) ou JSON">
+        📂 Importar CSVs Caixa / JSON
+        <input type="file" accept=".csv,.json" multiple onchange="importarArquivos(event)" style="display:none;" />
+      </label>
+      <button type="button" class="btn btn-emerald" onclick="carregarDados()">↻ Sincronizar</button>
     </div>
   </div>
 
-  <div class="wrap">
-    <div class="filters">
-      <input id="q" placeholder="Buscar cidade, bairro ou título..." oninput="filtrar()" style="flex:1;min-width:200px;">
-      <select id="uf" onchange="filtrar()"><option value="">Todos os Estados</option></select>
-      <select id="ordem" onchange="filtrar()">
-        <option value="score">Maior Score</option>
-        <option value="menor">Menor Lance</option>
-      </select>
+  <!-- CABEÇALHO -->
+  <header>
+    <div class="header-inner">
+      <div class="brand">
+        <div class="logo-box">O</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <h1>ORÁCULO DOS LEILÕES</h1>
+            <span class="badge-pro">PRO IA</span>
+          </div>
+          <p>Inteligência & ROI de Leilões Imobiliários</p>
+        </div>
+      </div>
+
+      <nav class="tabs">
+        <button type="button" class="tab-btn active" id="tab-radar" onclick="mudarAba('radar')">🎯 Radar</button>
+        <button type="button" class="tab-btn" id="tab-gpt" onclick="mudarAba('gpt')">🤖 Oráculo GPT</button>
+        <button type="button" class="tab-btn" id="tab-edital" onclick="mudarAba('edital')">⚖️ Analisador Edital</button>
+        <button type="button" class="tab-btn" id="tab-financiamento" onclick="mudarAba('financiamento')">🏦 Financiamento</button>
+        <button type="button" class="tab-btn" id="tab-whatsapp" onclick="mudarAba('whatsapp')">📲 Radar WhatsApp</button>
+      </nav>
+
+      <button type="button" class="btn" onclick="togglePainelCustos()">
+        ⚙️ Custos Globais <strong id="badge-custos" class="txt-emerald">10% + R$ 15k</strong>
+      </button>
     </div>
-    <div id="grid" class="grid"></div>
+
+    <!-- GAVETA DE CUSTOS GLOBAIS -->
+    <div id="painel-custos" class="costs-drawer">
+      <div class="costs-inner">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong style="font-size:13px;">Parâmetros Globais de ROI (Calculados em Tempo Real em Todos os Imóveis)</strong>
+            <p style="font-size:11px;color:var(--muted);">Configuração salva automaticamente no navegador e aplicada em toda a carteira.</p>
+          </div>
+          <button type="button" class="btn" onclick="resetarCustos()">Restaurar Padrão</button>
+        </div>
+        <div class="costs-grid">
+          <div>
+            <label class="field-label">Comissão Leiloeiro (%)</label>
+            <input type="number" id="c-comissao" value="5" step="0.5" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">ITBI Municipal (%)</label>
+            <input type="number" id="c-itbi" value="3" step="0.5" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">Registro / Escritura (%)</label>
+            <input type="number" id="c-registro" value="2" step="0.5" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">Reforma Estimada (R$)</label>
+            <input type="number" id="c-reforma" value="10000" step="1000" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">Desocupação (R$)</label>
+            <input type="number" id="c-desocupacao" value="3000" step="500" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">Advogado / Jurídico (R$)</label>
+            <input type="number" id="c-advogado" value="2000" step="500" oninput="atualizarCustos()" />
+          </div>
+          <div>
+            <label class="field-label">Corretagem Venda (%)</label>
+            <input type="number" id="c-corretagem" value="0" step="1" oninput="atualizarCustos()" />
+          </div>
+          <div style="display:flex;align-items:flex-end;">
+            <label class="btn" style="width:100%;justify-content:center;">
+              <input type="checkbox" id="f-roi-positivo" onchange="aplicarFiltros()" />
+              <span class="txt-emerald">Só ROI Positivo</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ================= ABA 1: RADAR ================= -->
+    <section id="view-radar" class="view active">
+      <div class="kpi-grid">
+        <div class="card-box">
+          <div class="kpi-label">Lotes Filtrados</div>
+          <div class="kpi-val" id="kpi-total">0</div>
+          <div class="kpi-sub txt-emerald" id="kpi-origem">Base sincronizada</div>
+        </div>
+        <div class="card-box">
+          <div class="kpi-label">ROI Médio (2ª Praça)</div>
+          <div class="kpi-val txt-emerald" id="kpi-roi">+0%</div>
+          <div class="kpi-sub">Líquido após impostos e reforma</div>
+        </div>
+        <div class="card-box">
+          <div class="kpi-label">Oportunidades Ouro (≥ 8.5)</div>
+          <div class="kpi-val txt-amber" id="kpi-ouro">0</div>
+          <div class="kpi-sub">Alta liquidez + desconto expressivo</div>
+        </div>
+        <div class="card-box">
+          <div class="kpi-label">Lucro Potencial (Top 50)</div>
+          <div class="kpi-val" id="kpi-lucro">R$ 0</div>
+          <div class="kpi-sub">Soma líquida dos melhores filtrados</div>
+        </div>
+      </div>
+
+      <div class="tags-row">
+        <span style="font-size:12px;font-weight:700;color:var(--muted);">Seleções:</span>
+        <button type="button" class="tag-btn active" data-tag="TODOS" onclick="setTag('TODOS')">Todos os Imóveis</button>
+        <button type="button" class="tag-btn" data-tag="OURO" onclick="setTag('OURO')">🔥 Score ≥ 8.5</button>
+        <button type="button" class="tag-btn" data-tag="PRAIA" onclick="setTag('PRAIA')">🏖️ Litoral / Praia</button>
+        <button type="button" class="tag-btn" data-tag="UNIVERSITARIO" onclick="setTag('UNIVERSITARIO')">🎓 Universitário</button>
+        <button type="button" class="tag-btn" data-tag="AIRBNB" onclick="setTag('AIRBNB')">🔑 Airbnb</button>
+        <button type="button" class="tag-btn" data-tag="REVENDA" onclick="setTag('REVENDA')">💰 Revenda Rápida</button>
+        <button type="button" class="tag-btn" data-tag="FINANCIA" onclick="setTag('FINANCIA')">🏦 Aceita Financiamento</button>
+        <button type="button" class="tag-btn" data-tag="DESOCUPADO" onclick="setTag('DESOCUPADO')">🔓 Desocupado</button>
+      </div>
+
+      <div class="card-box filters-grid">
+        <div>
+          <label class="field-label">Buscar Bairro, Endereço ou Portal</label>
+          <input type="text" id="f-busca" placeholder="Ex: Maringá, Marialva, Zona 07..." oninput="aplicarFiltros()" />
+        </div>
+        <div>
+          <label class="field-label">Estado (UF)</label>
+          <select id="f-uf" onchange="aoMudarUF()">
+            <option value="">Todos os Estados</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Cidade</label>
+          <select id="f-cidade" onchange="aplicarFiltros()">
+            <option value="">Todas as Cidades</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Tipo de Imóvel</label>
+          <select id="f-tipo" onchange="aplicarFiltros()">
+            <option value="">Todos os Tipos</option>
+            <option value="Apartamento">Apartamento</option>
+            <option value="Casa">Casa / Sobrado</option>
+            <option value="Comercial">Sala / Comercial</option>
+            <option value="Terreno">Terreno / Lote</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Lance Máximo</label>
+          <select id="f-max-preco" onchange="aplicarFiltros()">
+            <option value="0">Sem limite</option>
+            <option value="120000">Até R$ 120 mil</option>
+            <option value="200000">Até R$ 200 mil</option>
+            <option value="300000">Até R$ 300 mil</option>
+            <option value="500000">Até R$ 500 mil</option>
+            <option value="1000000">Até R$ 1,0 mi</option>
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Ordenar Por</label>
+          <select id="f-ordem" onchange="aplicarFiltros()">
+            <option value="score">⭐ Maior Score (0–10)</option>
+            <option value="roi">📈 Maior ROI % (2ª Praça)</option>
+            <option value="lucro">💵 Maior Lucro Líquido (R$)</option>
+            <option value="desconto">🏷️ Maior Desconto %</option>
+            <option value="menor_preco">🔽 Menor Lance</option>
+          </select>
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--muted);">
+        <span id="contador-resultados">Exibindo 0 oportunidades</span>
+        <span>🟢 ROI Líquido Positivo  |  🔴 ROI Negativo / Cautela</span>
+      </div>
+
+      <div id="grid-lotes" class="lots-grid"></div>
+
+      <div id="box-carregar-mais" style="display:none;text-align:center;margin-top:22px;">
+        <button type="button" class="btn" style="padding:11px 28px;font-size:13px;" onclick="carregarMaisLotes()">Carregar mais lotes (+30)</button>
+      </div>
+    </section>
+
+    <!-- ================= ABA 2: ORÁCULO GPT ================= -->
+    <section id="view-gpt" class="view">
+      <div class="card-box" style="max-width:880px;margin:0 auto;">
+        <span class="txt-emerald" style="font-size:11px;font-weight:800;">🤖 MOTOR SEMÂNTICO ORÁCULO GPT</span>
+        <h2 style="font-size:19px;margin:4px 0;">Busque oportunidades conversando com a IA</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px;">Filtre sua carteira importada por cidade, estado, orçamento ou característica usando linguagem natural.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">
+          <button type="button" class="btn" onclick="usarPromptGPT('Apartamentos desocupados no PR até 250 mil')">"Apartamentos desocupados no PR até 250 mil"</button>
+          <button type="button" class="btn" onclick="usarPromptGPT('Imóveis com financiamento em SP até 300 mil')">"Com financiamento em SP até 300 mil"</button>
+          <button type="button" class="btn" onclick="usarPromptGPT('Oportunidades em SC ou litoral')">"Oportunidades em SC ou litoral"</button>
+          <button type="button" class="btn" onclick="usarPromptGPT('Imóveis em Maringá ou Marialva')">"Maringá ou Marialva"</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="gpt-input" placeholder="Ex: Casa desocupada no PR até 250 mil com ROI alto..." onkeydown="if(event.key==='Enter') executarGPT()" />
+          <button type="button" class="btn btn-primary" onclick="executarGPT()">Consultar</button>
+        </div>
+        <div id="gpt-resposta" style="margin-top:16px;font-size:12px;color:var(--muted);">Aguardando sua consulta acima.</div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 3: ANALISADOR DE EDITAL ================= -->
+    <section id="view-edital" class="view">
+      <div class="two-col">
+        <div class="card-box">
+          <span class="txt-emerald" style="font-size:11px;font-weight:800;">AUDITORIA JURÍDICA</span>
+          <h2 style="font-size:18px;margin:4px 0 8px;">Analisador de Edital & Matrícula</h2>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:10px;">Cole o trecho do edital ou matrícula para extrair ocupação, dívidas propter rem e penhoras.</p>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button type="button" class="btn btn-emerald" onclick="carregarExemploEdital('limpo')">📄 Exemplo Limpo</button>
+            <button type="button" class="btn" style="color:var(--amber);" onclick="carregarExemploEdital('risco')">⚠️ Exemplo com Risco</button>
+          </div>
+          <textarea id="edital-texto" rows="9" placeholder="Cole aqui o texto do edital ou matrícula..."></textarea>
+          <button type="button" class="btn btn-primary" style="width:100%;justify-content:center;padding:10px;margin-top:10px;" onclick="auditarEdital()">Auditar Documento</button>
+        </div>
+        <div id="edital-resultado" class="card-box" style="display:flex;align-items:center;justify-content:center;text-align:center;font-size:12px;color:var(--muted);">
+          Cole um edital ou clique em um exemplo ao lado para auditar.
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 4: FINANCIAMENTO ================= -->
+    <section id="view-financiamento" class="view">
+      <div class="two-col">
+        <div class="card-box">
+          <span class="txt-emerald" style="font-size:11px;font-weight:800;">ENGENHARIA FINANCEIRA</span>
+          <h2 style="font-size:18px;margin:4px 0 12px;">Simulador de Financiamento & ROI Alavancado</h2>
+          <div style="margin-bottom:10px;">
+            <label class="field-label">Importar Imóvel do Radar</label>
+            <select id="sim-select-imovel" onchange="importarImovelSimulador()">
+              <option value="">-- Selecione um imóvel --</option>
+            </select>
+          </div>
+          <div class="two-col" style="gap:10px;">
+            <div><label class="field-label">Valor de Mercado (R$)</label><input type="number" id="sim-mercado" value="350000" oninput="calcularSimulador()" /></div>
+            <div><label class="field-label">Valor do Lance (R$)</label><input type="number" id="sim-lance" value="210000" oninput="calcularSimulador()" /></div>
+            <div><label class="field-label">Entrada (%)</label><input type="number" id="sim-entrada" value="20" oninput="calcularSimulador()" /></div>
+            <div><label class="field-label">Taxa Juros (% a.a.)</label><input type="number" id="sim-juros" value="10.5" step="0.1" oninput="calcularSimulador()" /></div>
+            <div><label class="field-label">Prazo (Meses)</label><input type="number" id="sim-prazo" value="360" oninput="calcularSimulador()" /></div>
+            <div><label class="field-label">Meses até Revenda</label><input type="number" id="sim-revenda" value="6" oninput="calcularSimulador()" /></div>
+          </div>
+        </div>
+        <div id="sim-resultado" class="card-box"></div>
+      </div>
+    </section>
+
+    <!-- ================= ABA 5: WHATSAPP ================= -->
+    <section id="view-whatsapp" class="view">
+      <div class="card-box" style="max-width:720px;margin:0 auto;">
+        <span class="txt-emerald" style="font-size:11px;font-weight:800;">AUTOMAÇÃO UAIZAP</span>
+        <h2 style="font-size:18px;margin:4px 0 8px;">Alertas Instantâneos no WhatsApp</h2>
+        <div class="two-col" style="margin-bottom:12px;">
+          <div><label class="field-label">Seu WhatsApp (DDD)</label><input type="text" id="wa-numero" value="(44) 99988-7766" oninput="atualizarPreviewWA()" /></div>
+          <div><label class="field-label">Cidades Monitoradas</label><input type="text" id="wa-cidades" value="Maringá, Marialva, Londrina, Curitiba" oninput="atualizarPreviewWA()" /></div>
+        </div>
+        <pre id="wa-preview" style="background:#04070d;border:1px solid var(--border);padding:12px;border-radius:10px;font-size:12px;color:#6ee7b7;white-space:pre-wrap;margin-bottom:12px;"></pre>
+        <button type="button" class="btn btn-primary" onclick="salvarRegraWA()">Salvar Regra</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL DOSSIÊ COMPLETO -->
+  <div id="modal-dossie" class="modal-bg" onclick="if(event.target===this) fecharModal()">
+    <div class="modal-card">
+      <div style="text-align:right;margin-bottom:8px;">
+        <button type="button" class="btn" onclick="fecharModal()">✕ Fechar</button>
+      </div>
+      <div id="modal-conteudo"></div>
+    </div>
   </div>
 
   <script>
-    const DEMO = [
-      { id: 'CX-01', titulo: 'Apartamento 2Q - Zona 07', cidade: 'Maringá', uf: 'PR', lance2: 198000, avaliacao: 340000, score: 9.4, portal: 'Caixa Online', url: 'https://venda-imoveis.caixa.gov.br/' },
-      { id: 'CX-02', titulo: 'Casa Residencial - Jd. Alvorada', cidade: 'Maringá', uf: 'PR', lance2: 275000, avaliacao: 480000, score: 9.1, portal: 'Kronberg Leilões', url: 'https://www.kronbergleiloes.com.br/' },
-      { id: 'SB-03', titulo: 'Apto Frente Mar - Meia Praia', cidade: 'Itapema', uf: 'SC', lance2: 410000, avaliacao: 680000, score: 9.3, portal: 'Superbid', url: 'https://www.superbid.net/' }
-    ];
-    let LOTES = [];
-    const BRL = v => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+    const IMG_FALLBACK = {
+      Apartamento: 'https://images.pexels.com/photos/323780/pexels-photo-323780.jpeg?auto=compress&cs=tinysrgb&w=800',
+      Casa: 'https://images.pexels.com/photos/106399/pexels-photo-106399.jpeg?auto=compress&cs=tinysrgb&w=800',
+      Terreno: 'https://images.pexels.com/photos/440731/pexels-photo-440731.jpeg?auto=compress&cs=tinysrgb&w=800',
+      Comercial: 'https://images.pexels.com/photos/323705/pexels-photo-323705.jpeg?auto=compress&cs=tinysrgb&w=800'
+    };
 
-    function montarUFs() {
-      const sel = document.getElementById('uf');
-      const ufs = [...new Set(LOTES.map(l => l.uf).filter(Boolean))].sort();
-      sel.innerHTML = '<option value="">Todos os Estados</option>' + ufs.map(u => `<option value="${u}">${u}</option>`).join('');
+    const LOTES_DEMO = [
+      {
+        id: 'DEMO-01',
+        titulo: 'Apartamento 2 Quartos - Zona 07 (Próximo UEM)',
+        tipo: 'Apartamento',
+        portal: 'Caixa Econômica (Venda Online)',
+        url: 'https://venda-imoveis.caixa.gov.br/',
+        uf: 'PR', cidade: 'Maringá', bairro: 'Zona 07',
+        endereco: 'Av. Colombo, 5790 - Zona 07, Maringá - PR',
+        area: 68, quartos: 2, vagas: 1,
+        avaliacao: 340000, mercado: 365000, lance1: 340000, lance2: 198000,
+        financia: true, ocupado: 'DESOCUPADO',
+        estrategias: ['UNIVERSITARIO', 'REVENDA'],
+        score: 9.4, img: '',
+        processo: 'Extrajudicial Caixa • Matrícula limpa',
+        resumoEdital: 'Imóvel desocupado. Aceita financiamento habitacional e FGTS. Dívidas anteriores quitadas pela Caixa.'
+      },
+      {
+        id: 'DEMO-02',
+        titulo: 'Casa Residencial - Jardim Alvorada',
+        tipo: 'Casa',
+        portal: 'Kronberg Leilões (PR)',
+        url: 'https://www.kronbergleiloes.com.br/',
+        uf: 'PR', cidade: 'Maringá', bairro: 'Jardim Alvorada',
+        endereco: 'Rua Caracas, 420 - Jardim Alvorada, Maringá - PR',
+        area: 145, quartos: 3, vagas: 2,
+        avaliacao: 480000, mercado: 510000, lance1: 480000, lance2: 275000,
+        financia: false, ocupado: 'DESOCUPADO',
+        estrategias: ['REVENDA'],
+        score: 9.1, img: '',
+        processo: 'Leilão Judicial TJPR • Livre de ônus',
+        resumoEdital: 'Casa em alvenaria com edícula nos fundos, desocupada, pronta para reforma e revenda.'
+      },
+      {
+        id: 'DEMO-03',
+        titulo: 'Apartamento Frente Mar - Meia Praia',
+        tipo: 'Apartamento',
+        portal: 'Superbid Exchange',
+        url: 'https://www.superbid.net/',
+        uf: 'SC', cidade: 'Itapema', bairro: 'Meia Praia',
+        endereco: 'Rua 250, 310 - Meia Praia, Itapema - SC',
+        area: 84, quartos: 2, vagas: 1,
+        avaliacao: 680000, mercado: 720000, lance1: 680000, lance2: 410000,
+        financia: false, ocupado: 'DESOCUPADO',
+        estrategias: ['PRAIA', 'AIRBNB', 'REVENDA'],
+        score: 9.3, img: '',
+        processo: 'Leilão Extrajudicial • Livre de ônus',
+        resumoEdital: 'Apartamento a 180 metros do mar, alto potencial de diárias no Airbnb.'
+      },
+      {
+        id: 'DEMO-04',
+        titulo: 'Sobrado Condomínio Fechado - Água Verde',
+        tipo: 'Casa',
+        portal: 'Portal Zuk',
+        url: 'https://www.portalzuk.com.br/',
+        uf: 'PR', cidade: 'Curitiba', bairro: 'Água Verde',
+        endereco: 'Av. República Argentina, 1900 - Água Verde, Curitiba - PR',
+        area: 165, quartos: 3, vagas: 2,
+        avaliacao: 790000, mercado: 830000, lance1: 790000, lance2: 465000,
+        financia: true, ocupado: 'DESOCUPADO',
+        estrategias: ['REVENDA'],
+        score: 9.0, img: '',
+        processo: 'Consolidação Fiduciária • Matrícula atualizada',
+        resumoEdital: 'Sobrado triplex desocupado em condomínio fechado, aceita financiamento bancário.'
+      }
+    ];
+
+    let TODOS_LOTES = [];
+    let LOTES_FILTRADOS = [];
+    let LIMITE_EXIBICAO = 30;
+    let TAG_ATIVA = 'TODOS';
+    let CUSTOS = { comissao: 5, itbi: 3, registro: 2, reforma: 10000, desocupacao: 3000, advogado: 2000, corretagem: 0 };
+
+    const BRL = (v) => Number(v || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+
+    function getFallbackImg(tipo) {
+      return IMG_FALLBACK[tipo] || IMG_FALLBACK.Apartamento;
     }
 
-    function filtrar() {
-      const q = document.getElementById('q').value.toLowerCase();
-      const uf = document.getElementById('uf').value;
-      const ord = document.getElementById('ordem').value;
-      let lista = LOTES.filter(l => (!uf || l.uf === uf) && (!q || `${l.titulo} ${l.cidade} ${l.portal}`.toLowerCase().includes(q)));
-      lista.sort((a, b) => ord === 'menor' ? a.lance2 - b.lance2 : b.score - a.score);
-      document.getElementById('grid').innerHTML = lista.slice(0, 60).map(l => {
-        const desc = l.avaliacao > 0 ? Math.round(((l.avaliacao - l.lance2) / l.avaliacao) * 100) : 0;
-        return `<div class="card">
-          <span class="tag">⭐ ${l.score} • -${desc}%</span>
-          <div class="muted" style="margin-top:8px;">${l.cidade}/${l.uf} • ${l.portal}</div>
-          <div style="font-weight:bold;font-size:15px;margin:4px 0;">${l.titulo}</div>
-          <div class="price">${BRL(l.lance2)}</div>
-          <div class="muted">Avaliação: ${BRL(l.avaliacao)}</div>
-          <div style="margin-top:12px;"><a href="${l.url}" target="_blank" class="btn" style="text-decoration:none;display:inline-block;">Ver Edital ↗</a></div>
+    function linkSeguroEdital(l) {
+      if (l.id && l.id.startsWith('CX-')) {
+        const num = l.id.replace('CX-', '').replace(/\D/g, '').padStart(13, '0');
+        return `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${num}`;
+      }
+      if (l.url && l.url.startsWith('http')) return l.url;
+      return `https://www.google.com/search?q=${encodeURIComponent(l.portal + ' ' + l.titulo + ' ' + l.cidade)}`;
+    }
+
+    function calcularFinanceiro(lote) {
+      const venda = Number(lote.mercado || lote.avaliacao || 0);
+      const percCompra = (CUSTOS.comissao + CUSTOS.itbi + CUSTOS.registro) / 100;
+      const fixos = CUSTOS.reforma + CUSTOS.desocupacao + CUSTOS.advogado;
+      const corretagem = venda * (CUSTOS.corretagem / 100);
+
+      const lance1 = Number(lote.lance1 || lote.avaliacao || 0);
+      const inv1 = lance1 * (1 + percCompra) + fixos;
+      const lucro1 = venda - corretagem - inv1;
+      const roi1 = inv1 > 0 ? (lucro1 / inv1) * 100 : 0;
+
+      const lance2 = Number(lote.lance2 || lance1);
+      const inv2 = lance2 * (1 + percCompra) + fixos;
+      const lucro2 = venda - corretagem - inv2;
+      const roi2 = inv2 > 0 ? (lucro2 / inv2) * 100 : 0;
+
+      const desconto = venda > 0 ? Math.round(((venda - lance2) / venda) * 100) : 0;
+      return { venda, lance1, inv1, lucro1, roi1, lance2, inv2, lucro2, roi2, desconto };
+    }
+
+    function normalizarLote(item, idx) {
+      const avaliacao = Number(item.avaliacao || item.lance1 || item.lance2 || 100000);
+      const lance2 = Number(item.lance2 || item.lance1 || avaliacao);
+      const lance1 = Number(item.lance1 || avaliacao);
+      const tipo = String(item.tipo || 'Apartamento');
+      return {
+        id: String(item.id || `LOTE-${idx}`),
+        titulo: String(item.titulo || `${tipo} - ${item.cidade || 'Brasil'}`),
+        tipo,
+        portal: String(item.portal || 'Leilão Oficial'),
+        url: String(item.url || ''),
+        uf: String(item.uf || 'PR').toUpperCase(),
+        cidade: String(item.cidade || 'Não informada'),
+        bairro: String(item.bairro || 'Centro'),
+        endereco: String(item.endereco || `${item.cidade || ''} - ${item.uf || ''}`),
+        area: Number(item.area || 65),
+        quartos: Number(item.quartos ?? 2),
+        vagas: Number(item.vagas ?? 1),
+        avaliacao,
+        mercado: Number(item.mercado || Math.round(avaliacao * 1.07)),
+        lance1,
+        lance2,
+        financia: Boolean(item.financia),
+        ocupado: String(item.ocupado || 'NAO_INFORMADO'),
+        estrategias: Array.isArray(item.estrategias) ? item.estrategias : ['REVENDA'],
+        score: Number(item.score || 7.8),
+        img: String(item.img || ''),
+        processo: String(item.processo || 'Consulte edital'),
+        resumoEdital: String(item.resumoEdital || 'Consulte o edital oficial para detalhes completos.')
+      };
+    }
+
+    function parseCsvCaixaTexto(texto) {
+      const linhas = texto.split('\n').slice(4);
+      const lista = [];
+      for (const linha of linhas) {
+        const cols = linha.split(';').map(s => s.trim());
+        if (cols.length < 10 || !cols[0]) continue;
+        const idNum = cols[0].replace(/\D/g, '');
+        if (!idNum) continue;
+        const id13 = idNum.padStart(13, '0');
+        const preco = parseFloat((cols[5] || '0').replace(/\./g, '').replace(',', '.'));
+        const avaliacao = parseFloat((cols[6] || '0').replace(/\./g, '').replace(',', '.'));
+        if (preco <= 15000 || avaliacao <= 15000) continue;
+
+        const uf = (cols[1] || 'PR').toUpperCase();
+        const cidade = cols[2] || '';
+        const bairro = cols[3] || 'Centro';
+        const endereco = cols[4] || '';
+        const modalidade = cols[8] || 'Venda Online';
+        const desc = cols[9] || '';
+
+        const desconto = Math.round(((avaliacao - preco) / avaliacao) * 100);
+        const ocupado = /ocupado/i.test(desc) ? 'OCUPADO' : 'DESOCUPADO';
+        const financia = /aceita financiamento/i.test(desc);
+        const tipo = /\bcasa|sobrado\b/i.test(desc) ? 'Casa' : /\bterreno|lote|gleba\b/i.test(desc) ? 'Terreno' : /\bcomercial|sala|loja|galp/i.test(desc) ? 'Comercial' : 'Apartamento';
+        const matchArea = desc.match(/(\d+[.,]?\d*)\s*m2/i);
+        const area = matchArea ? parseFloat(matchArea[1].replace(',', '.')) : 65;
+
+        const tags = [];
+        if (desconto >= 38) tags.push('REVENDA');
+        if (/praia|litoral|balne[aá]rio|beira[- ]mar|meia praia|caiob[aá]|guaratuba|matinhos|cambori[uú]|guaruj[aá]|praia grande|santos|ubatuba/i.test(`${bairro} ${cidade} ${desc}`)) {
+          tags.push('PRAIA', 'AIRBNB');
+        }
+        if (/universidade|faculdade|campus|uem|ufpr|uel|usp|unicamp|puc/i.test(`${bairro} ${cidade} ${desc}`)) {
+          tags.push('UNIVERSITARIO');
+        }
+
+        let score = 5.0 + (desconto / 11.2) + (ocupado === 'DESOCUPADO' ? 0.4 : 0) + (financia ? 0.3 : 0) + 0.5;
+        score = Math.min(9.9, Math.max(1.0, Number(score.toFixed(1))));
+
+        lista.push({
+          id: `CX-${id13}`,
+          titulo: `${tipo} - ${bairro || cidade}`,
+          tipo,
+          portal: `Caixa (${modalidade})`,
+          url: `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${id13}`,
+          uf, cidade, bairro, endereco,
+          area, quartos: tipo === 'Terreno' ? 0 : 2, vagas: tipo === 'Terreno' ? 0 : 1,
+          avaliacao, mercado: Math.round(avaliacao * 1.07), lance1: avaliacao, lance2: preco,
+          financia, ocupado, estrategias: tags.length ? tags : ['REVENDA'],
+          score, img: `https://venda-imoveis.caixa.gov.br/fotos/F${id13}21.jpg`,
+          processo: `Caixa ID ${id13} • ${modalidade}`, resumoEdital: desc
+        });
+      }
+      return lista;
+    }
+
+    function processarListaCarregada(dados, origemTexto) {
+      const listaBruta = Array.isArray(dados) ? dados : (dados.lotes || []);
+      if (!listaBruta.length) return false;
+
+      TODOS_LOTES = listaBruta.map(normalizarLote);
+      const dataStr = dados.atualizado_em ? new Date(dados.atualizado_em).toLocaleString('pt-BR') : 'Agora';
+
+      document.getElementById('status-dot').className = 'dot ok';
+      document.getElementById('status-text').textContent = `${origemTexto} • Atualizado: ${dataStr}`;
+      document.getElementById('status-count').textContent = `${TODOS_LOTES.length.toLocaleString('pt-BR')} imóveis ativos`;
+      document.getElementById('kpi-origem').textContent = origemTexto;
+
+      popularFiltrosGeograficos();
+      popularSelectSimulador();
+      aplicarFiltros();
+      return true;
+    }
+
+    async function carregarDados() {
+      const dot = document.getElementById('status-dot');
+      const txt = document.getElementById('status-text');
+      const cnt = document.getElementById('status-count');
+
+      dot.className = 'dot';
+      txt.textContent = 'Sincronizando imoveis.json...';
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      try {
+        const resp = await fetch(`./imoveis.json?t=${Date.now()}`, { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const dados = await resp.json();
+        if (!processarListaCarregada(dados, 'Base nacional sincronizada')) {
+          throw new Error('imoveis.json vazio');
+        }
+      } catch (e) {
+        clearTimeout(timeoutId);
+        TODOS_LOTES = LOTES_DEMO.map(normalizarLote);
+        dot.className = 'dot demo';
+        txt.textContent = `Modo Demonstração (${e.message}) — Selecione os CSVs da Caixa (PR, SP, SC) no botão ao lado`;
+        cnt.textContent = `${TODOS_LOTES.length} lotes demo`;
+        document.getElementById('kpi-origem').textContent = 'Base demonstrativa';
+
+        popularFiltrosGeograficos();
+        popularSelectSimulador();
+        aplicarFiltros();
+      }
+    }
+
+    async function importarArquivos(event) {
+      const files = Array.from(event.target.files || []);
+      if (!files.length) return;
+
+      const mapaUnico = new Map();
+      for (const f of files) {
+        const isCsv = f.name.toLowerCase().endsWith('.csv');
+        const txt = await new Promise((resolve) => {
+          const rd = new FileReader();
+          rd.onload = (e) => resolve(e.target.result);
+          rd.readAsText(f, isCsv ? 'ISO-8859-1' : 'UTF-8');
+        });
+
+        try {
+          const itens = isCsv
+            ? parseCsvCaixaTexto(txt)
+            : (() => { const j = JSON.parse(txt); return Array.isArray(j) ? j : (j.lotes || []); })();
+
+          for (const item of itens) {
+            mapaUnico.set(item.id || `${item.uf}-${item.cidade}-${item.endereco}`, item);
+          }
+        } catch (err) {
+          alert(`Erro ao ler ${f.name}: ${err.message}`);
+        }
+      }
+
+      const combinados = Array.from(mapaUnico.values());
+      if (!processarListaCarregada({ lotes: combinados }, `${files.length} arquivo(s) importado(s)`)) {
+        alert('Nenhum imóvel válido encontrado nos arquivos selecionados.');
+      }
+    }
+
+    function popularFiltrosGeograficos() {
+      const selUF = document.getElementById('f-uf');
+      const ufAtual = selUF.value;
+      const ufs = [...new Set(TODOS_LOTES.map(l => l.uf).filter(Boolean))].sort();
+      selUF.innerHTML = '<option value="">Todos os Estados</option>' + ufs.map(u => `<option value="${u}">${u}</option>`).join('');
+      if (ufs.includes(ufAtual)) selUF.value = ufAtual;
+      aoMudarUF();
+    }
+
+    function aoMudarUF() {
+      const uf = document.getElementById('f-uf').value;
+      const selCidade = document.getElementById('f-cidade');
+      const base = uf ? TODOS_LOTES.filter(l => l.uf === uf) : TODOS_LOTES;
+      const cidades = [...new Set(base.map(l => l.cidade).filter(Boolean))].sort();
+      selCidade.innerHTML = '<option value="">Todas as Cidades</option>' + cidades.slice(0, 600).map(c => `<option value="${c}">${c}</option>`).join('');
+      aplicarFiltros();
+    }
+
+    function setTag(tag) {
+      TAG_ATIVA = tag;
+      document.querySelectorAll('.tag-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tag === tag);
+      });
+      aplicarFiltros();
+    }
+
+    function aplicarFiltros() {
+      const busca = document.getElementById('f-busca').value.toLowerCase().trim();
+      const uf = document.getElementById('f-uf').value;
+      const cidade = document.getElementById('f-cidade').value;
+      const tipo = document.getElementById('f-tipo').value;
+      const maxPreco = Number(document.getElementById('f-max-preco').value || 0);
+      const ordem = document.getElementById('f-ordem').value;
+      const soPositivo = document.getElementById('f-roi-positivo').checked;
+
+      LOTES_FILTRADOS = TODOS_LOTES.filter(l => {
+        if (uf && l.uf !== uf) return false;
+        if (cidade && l.cidade !== cidade) return false;
+        if (tipo && l.tipo !== tipo) return false;
+        if (maxPreco > 0 && l.lance2 > maxPreco) return false;
+        if (TAG_ATIVA === 'OURO' && l.score < 8.5) return false;
+        if (TAG_ATIVA === 'FINANCIA' && !l.financia) return false;
+        if (TAG_ATIVA === 'DESOCUPADO' && l.ocupado !== 'DESOCUPADO') return false;
+        if (['PRAIA', 'UNIVERSITARIO', 'AIRBNB', 'REVENDA'].includes(TAG_ATIVA) && !l.estrategias.includes(TAG_ATIVA)) return false;
+        if (busca && !`${l.titulo} ${l.cidade} ${l.bairro} ${l.endereco} ${l.portal} ${l.uf}`.toLowerCase().includes(busca)) return false;
+        if (soPositivo && calcularFinanceiro(l).roi2 <= 0) return false;
+        return true;
+      });
+
+      LOTES_FILTRADOS.sort((a, b) => {
+        if (ordem === 'score') return b.score - a.score;
+        if (ordem === 'roi') return calcularFinanceiro(b).roi2 - calcularFinanceiro(a).roi2;
+        if (ordem === 'lucro') return calcularFinanceiro(b).lucro2 - calcularFinanceiro(a).lucro2;
+        if (ordem === 'desconto') return calcularFinanceiro(b).desconto - calcularFinanceiro(a).desconto;
+        if (ordem === 'menor_preco') return a.lance2 - b.lance2;
+        return 0;
+      });
+
+      LIMITE_EXIBICAO = 30;
+      atualizarKPIs();
+      renderizarCards();
+    }
+
+    function atualizarKPIs() {
+      document.getElementById('kpi-total').textContent = LOTES_FILTRADOS.length.toLocaleString('pt-BR');
+      const amostra = LOTES_FILTRADOS.slice(0, 50);
+      if (amostra.length) {
+        const mediaRoi = amostra.reduce((acc, l) => acc + calcularFinanceiro(l).roi2, 0) / amostra.length;
+        const somaLucro = amostra.reduce((acc, l) => acc + Math.max(0, calcularFinanceiro(l).lucro2), 0);
+        document.getElementById('kpi-roi').textContent = `${mediaRoi >= 0 ? '+' : ''}${mediaRoi.toFixed(1)}%`;
+        document.getElementById('kpi-lucro').textContent = BRL(somaLucro);
+      } else {
+        document.getElementById('kpi-roi').textContent = '0%';
+        document.getElementById('kpi-lucro').textContent = 'R$ 0';
+      }
+      document.getElementById('kpi-ouro').textContent = LOTES_FILTRADOS.filter(l => l.score >= 8.5).length.toLocaleString('pt-BR');
+    }
+
+    function renderizarCards() {
+      const grid = document.getElementById('grid-lotes');
+      const visiveis = LOTES_FILTRADOS.slice(0, LIMITE_EXIBICAO);
+
+      document.getElementById('contador-resultados').innerHTML =
+        `Exibindo <strong>${visiveis.length}</strong> de <strong>${LOTES_FILTRADOS.length.toLocaleString('pt-BR')}</strong> oportunidades`;
+
+      if (!visiveis.length) {
+        grid.innerHTML = `<div class="card-box" style="grid-column:1/-1;text-align:center;color:var(--muted);">Nenhum imóvel encontrado com os filtros atuais.</div>`;
+        document.getElementById('box-carregar-mais').style.display = 'none';
+        return;
+      }
+
+      grid.innerHTML = visiveis.map(l => {
+        const fin = calcularFinanceiro(l);
+        const fb = getFallbackImg(l.tipo);
+        const imgSrc = l.img || fb;
+        const urlEdital = linkSeguroEdital(l);
+
+        return `
+          <article class="lot-card">
+            <div>
+              <div class="lot-img-wrap">
+                <img src="${imgSrc}" data-fb="${fb}" onerror="this.onerror=null;this.src=this.dataset.fb;" alt="${l.titulo}" loading="lazy" />
+                <div class="badges-top">
+                  <div class="badge-group">
+                    <span class="badge-score">⭐ ${l.score.toFixed(1)}</span>
+                    <span class="badge-disc">-${fin.desconto}%</span>
+                  </div>
+                  ${l.financia ? '<span class="badge-fin">🏦 FINANCIA</span>' : ''}
+                </div>
+                <span class="badge-portal">${l.portal}</span>
+              </div>
+              <div class="lot-body">
+                <div class="lot-loc">${l.cidade} • ${l.uf} (${l.bairro})</div>
+                <div class="lot-title" title="${l.titulo}">${l.titulo}</div>
+                <div class="lot-meta">${l.area}m² • ${l.quartos} qts • ${l.ocupado === 'DESOCUPADO' ? '🔓 Desocupado' : '🔒 Verificar ocupação'}</div>
+                <div class="fin-box">
+                  <div class="fin-row">
+                    <span style="color:var(--muted);">Mercado Estimado:</span>
+                    <strong>${BRL(fin.venda)}</strong>
+                  </div>
+                  <div class="fin-row">
+                    <span style="color:var(--muted);">1ª Praça: <strong style="color:var(--text);">${BRL(fin.lance1)}</strong></span>
+                    <strong class="${fin.roi1 >= 0 ? 'txt-emerald' : 'txt-rose'}">${fin.roi1 >= 0 ? '+' : ''}${fin.roi1.toFixed(1)}% ROI</strong>
+                  </div>
+                  <div class="fin-row">
+                    <div>
+                      <span style="font-size:10px;color:var(--muted);display:block;">2ª Praça / Venda Online</span>
+                      <strong style="font-size:15px;">${BRL(fin.lance2)}</strong>
+                    </div>
+                    <div class="roi-pill ${fin.roi2 < 0 ? 'neg' : ''}">
+                      <strong style="display:block;font-size:12px;">${fin.roi2 >= 0 ? '+' : ''}${fin.roi2.toFixed(1)}% ROI</strong>
+                      <span style="font-size:10px;">Lucro: ${BRL(fin.lucro2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="lot-footer">
+              <button type="button" class="btn btn-primary" onclick="abrirDossie('${l.id}')">Abrir Dossiê & ROI</button>
+              <a href="${urlEdital}" target="_blank" rel="noopener noreferrer" class="btn">Edital ↗</a>
+            </div>
+          </article>
+        `;
+      }).join('');
+
+      document.getElementById('box-carregar-mais').style.display = LOTES_FILTRADOS.length > LIMITE_EXIBICAO ? 'block' : 'none';
+    }
+
+    function carregarMaisLotes() {
+      LIMITE_EXIBICAO += 30;
+      renderizarCards();
+    }
+
+    function togglePainelCustos() {
+      document.getElementById('painel-custos').classList.toggle('open');
+    }
+
+    function carregarCustosSalvos() {
+      try {
+        const salvo = JSON.parse(localStorage.getItem('oraculo_custos'));
+        if (salvo) {
+          CUSTOS = { ...CUSTOS, ...salvo };
+          document.getElementById('c-comissao').value = CUSTOS.comissao;
+          document.getElementById('c-itbi').value = CUSTOS.itbi;
+          document.getElementById('c-registro').value = CUSTOS.registro;
+          document.getElementById('c-reforma').value = CUSTOS.reforma;
+          document.getElementById('c-desocupacao').value = CUSTOS.desocupacao;
+          document.getElementById('c-advogado').value = CUSTOS.advogado;
+          document.getElementById('c-corretagem').value = CUSTOS.corretagem;
+        }
+      } catch {}
+      atualizarBadgeCustos();
+    }
+
+    function atualizarBadgeCustos() {
+      const perc = CUSTOS.comissao + CUSTOS.itbi + CUSTOS.registro;
+      const fixoK = Math.round((CUSTOS.reforma + CUSTOS.desocupacao + CUSTOS.advogado) / 1000);
+      document.getElementById('badge-custos').textContent = `${perc}% + R$ ${fixoK}k`;
+    }
+
+    function atualizarCustos() {
+      CUSTOS.comissao = Number(document.getElementById('c-comissao').value || 0);
+      CUSTOS.itbi = Number(document.getElementById('c-itbi').value || 0);
+      CUSTOS.registro = Number(document.getElementById('c-registro').value || 0);
+      CUSTOS.reforma = Number(document.getElementById('c-reforma').value || 0);
+      CUSTOS.desocupacao = Number(document.getElementById('c-desocupacao').value || 0);
+      CUSTOS.advogado = Number(document.getElementById('c-advogado').value || 0);
+      CUSTOS.corretagem = Number(document.getElementById('c-corretagem').value || 0);
+      try { localStorage.setItem('oraculo_custos', JSON.stringify(CUSTOS)); } catch {}
+      atualizarBadgeCustos();
+      aplicarFiltros();
+    }
+
+    function resetarCustos() {
+      document.getElementById('c-comissao').value = 5;
+      document.getElementById('c-itbi').value = 3;
+      document.getElementById('c-registro').value = 2;
+      document.getElementById('c-reforma').value = 10000;
+      document.getElementById('c-desocupacao').value = 3000;
+      document.getElementById('c-advogado').value = 2000;
+      document.getElementById('c-corretagem').value = 0;
+      atualizarCustos();
+    }
+
+    function abrirDossie(id) {
+      const l = TODOS_LOTES.find(x => x.id === id);
+      if (!l) return;
+      const fin = calcularFinanceiro(l);
+      const fb = getFallbackImg(l.tipo);
+      const urlEdital = linkSeguroEdital(l);
+      const urlBusca = `https://www.google.com/search?q=${encodeURIComponent('leilao ' + l.portal + ' ' + l.cidade + ' ' + l.endereco)}`;
+
+      document.getElementById('modal-conteudo').innerHTML = `
+        <div style="height:190px;border-radius:12px;overflow:hidden;margin-bottom:12px;">
+          <img src="${l.img || fb}" data-fb="${fb}" onerror="this.onerror=null;this.src=this.dataset.fb;" style="width:100%;height:100%;object-fit:cover;" />
+        </div>
+        <div class="lot-loc">${l.portal} • ${l.cidade}/${l.uf}</div>
+        <h2 style="font-size:18px;margin:4px 0;">${l.titulo}</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:14px;">${l.endereco}</p>
+        <div class="two-col">
+          <div class="fin-box">
+            <strong style="display:block;margin-bottom:8px;">Raio-X Financeiro (2ª Praça)</strong>
+            <div class="fin-row"><span>Lance Mínimo:</span><strong>${BRL(fin.lance2)}</strong></div>
+            <div class="fin-row"><span>Impostos + Comissão:</span><span>${BRL(fin.lance2 * ((CUSTOS.comissao+CUSTOS.itbi+CUSTOS.registro)/100))}</span></div>
+            <div class="fin-row"><span>Reforma + Jurídico:</span><span>${BRL(CUSTOS.reforma + CUSTOS.desocupacao + CUSTOS.advogado)}</span></div>
+            <div class="fin-row"><span>Investimento Total:</span><strong class="txt-amber">${BRL(fin.inv2)}</strong></div>
+            <div class="fin-row"><span>Venda Estimada:</span><strong>${BRL(fin.venda)}</strong></div>
+            <div class="fin-row"><strong>Lucro Líquido:</strong><strong class="${fin.lucro2 >= 0 ? 'txt-emerald' : 'txt-rose'}">${BRL(fin.lucro2)} (${fin.roi2.toFixed(1)}%)</strong></div>
+          </div>
+          <div class="fin-box">
+            <strong style="display:block;margin-bottom:8px;">Checklist Jurídico & Edital</strong>
+            <p style="margin-bottom:6px;">Ocupação: <strong>${l.ocupado}</strong></p>
+            <p style="margin-bottom:6px;">Financiamento: <strong>${l.financia ? 'Sim (Aceita)' : 'Não / À vista'}</strong></p>
+            <p style="margin-bottom:6px;">Processo: ${l.processo}</p>
+            <p style="color:var(--muted);margin-top:8px;">${l.resumoEdital}</p>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:16px;">
+          <a href="${urlBusca}" target="_blank" rel="noopener noreferrer" class="btn">Buscar no Google ↗</a>
+          <a href="${urlEdital}" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Acessar Leiloeiro ↗</a>
+        </div>
+      `;
+      document.getElementById('modal-dossie').classList.add('open');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-dossie').classList.remove('open');
+    }
+
+    function mudarAba(aba) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById(`view-${aba}`).classList.add('active');
+      document.getElementById(`tab-${aba}`).classList.add('active');
+    }
+
+    function usarPromptGPT(t) {
+      document.getElementById('gpt-input').value = t;
+      executarGPT();
+    }
+
+    function executarGPT() {
+      const q = document.getElementById('gpt-input').value.toLowerCase();
+      if (!q) return;
+      const res = TODOS_LOTES.filter(l => {
+        const fin = calcularFinanceiro(l);
+        if (q.includes('desocupad') && l.ocupado !== 'DESOCUPADO') return false;
+        if (q.includes('financ') && !l.financia) return false;
+        if (/\bpr\b/.test(q) && l.uf !== 'PR') return false;
+        if (/\bsp\b/.test(q) && l.uf !== 'SP') return false;
+        if (/\bsc\b/.test(q) && l.uf !== 'SC') return false;
+        if (q.includes('litoral') && !l.estrategias.includes('PRAIA')) return false;
+        if (q.includes('maring') && !l.cidade.toLowerCase().includes('maring')) return false;
+        if (q.includes('marialv') && !l.cidade.toLowerCase().includes('marialv')) return false;
+        if (q.includes('curitiba') && !l.cidade.toLowerCase().includes('curitiba')) return false;
+        const m = q.match(/(\d+)\s*mil/);
+        if (m && fin.lance2 > Number(m[1]) * 1000) return false;
+        return true;
+      }).sort((a, b) => b.score - a.score).slice(0, 10);
+
+      const box = document.getElementById('gpt-resposta');
+      if (!res.length) {
+        box.innerHTML = `<p class="txt-amber"><strong>Nenhum imóvel encontrado na carteira atual para essa combinação.</strong></p>`;
+        return;
+      }
+      box.innerHTML = res.map(l => {
+        const fin = calcularFinanceiro(l);
+        return `<div class="fin-box" style="margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+          <div>
+            <strong>${l.titulo}</strong> (${l.cidade}/${l.uf})<br/>
+            <span style="color:var(--muted);">Lance: ${BRL(fin.lance2)} • Lucro: <strong class="txt-emerald">${BRL(fin.lucro2)} (+${fin.roi2.toFixed(1)}%)</strong></span>
+          </div>
+          <button type="button" class="btn btn-primary" onclick="abrirDossie('${l.id}')">Ver Dossiê</button>
         </div>`;
       }).join('');
     }
 
-    async function iniciar() {
-      const st = document.getElementById('status');
+    function carregarExemploEdital(tipo) {
+      document.getElementById('edital-texto').value = tipo === 'limpo'
+        ? 'EDITAL CAIXA: Imóvel desocupado. Débitos de IPTU e condomínio anteriores quitados pelo vendedor. Aceita financiamento.'
+        : 'EDITAL JUDICIAL: Imóvel ocupado pelo executado. Débitos de condomínio e IPTU recaem sobre o arrematante.';
+      auditarEdital();
+    }
+
+    function auditarEdital() {
+      const txt = document.getElementById('edital-texto').value.toLowerCase();
+      if (!txt.trim()) return;
+      const ocupado = /ocupado pelo|imóvel ocupado/.test(txt);
+      const divida = /recaem sobre o arrematante|responsabilidade do comprador/.test(txt);
+      document.getElementById('edital-resultado').innerHTML = `
+        <div style="text-align:left;width:100%;">
+          <p style="font-size:14px;font-weight:800;margin-bottom:10px;" class="${ocupado && divida ? 'txt-rose' : 'txt-emerald'}">
+            ${ocupado && divida ? '⚠️ RISCO ELEVADO: Ocupado + Dívidas ao Arrematante' : '✅ EDITAL FAVORÁVEL'}
+          </p>
+          <p style="margin-bottom:6px;"><strong>Ocupação:</strong> ${ocupado ? 'Ocupado (prever imissão na posse)' : 'Desocupado / Sem menção'}</p>
+          <p><strong>Dívidas Propter Rem:</strong> ${divida ? 'Por conta do comprador' : 'Quitadas pelo vendedor'}</p>
+        </div>
+      `;
+    }
+
+    function popularSelectSimulador() {
+      const sel = document.getElementById('sim-select-imovel');
+      sel.innerHTML = '<option value="">-- Selecione um imóvel --</option>' +
+        TODOS_LOTES.slice(0, 150).map(l => `<option value="${l.id}">${l.cidade}/${l.uf} - ${l.titulo} (${BRL(l.lance2)})</option>`).join('');
+    }
+
+    function importarImovelSimulador() {
+      const l = TODOS_LOTES.find(x => x.id === document.getElementById('sim-select-imovel').value);
+      if (!l) return;
+      document.getElementById('sim-mercado').value = l.mercado;
+      document.getElementById('sim-lance').value = l.lance2;
+      calcularSimulador();
+    }
+
+    function calcularSimulador() {
+      const mercado = Number(document.getElementById('sim-mercado').value || 0);
+      const lance = Number(document.getElementById('sim-lance').value || 0);
+      const percEntrada = Number(document.getElementById('sim-entrada').value || 20) / 100;
+      const jurosAno = Number(document.getElementById('sim-juros').value || 10) / 100;
+      const prazo = Number(document.getElementById('sim-prazo').value || 360);
+      const mesesRevenda = Number(document.getElementById('sim-revenda').value || 6);
+
+      const entrada = lance * percEntrada;
+      const financiado = lance - entrada;
+      const docs = lance * 0.10;
+      const parcela1 = (financiado / prazo) + (financiado * (jurosAno / 12));
+      const caixaTotal = entrada + docs + (parcela1 * mesesRevenda);
+      const saldoDevedor = financiado - ((financiado / prazo) * mesesRevenda);
+      const lucro = mercado - saldoDevedor - caixaTotal;
+      const roiCaixa = caixaTotal > 0 ? (lucro / caixaTotal) * 100 : 0;
+
+      document.getElementById('sim-resultado').innerHTML = `
+        <strong style="font-size:15px;display:block;margin-bottom:12px;">Resultado Projetado</strong>
+        <div class="two-col" style="margin-bottom:12px;">
+          <div class="fin-box"><span style="font-size:11px;color:var(--muted);">Capital Próprio</span><strong style="display:block;font-size:18px;">${BRL(caixaTotal)}</strong></div>
+          <div class="fin-box"><span style="font-size:11px;color:var(--muted);">ROI Alavancado</span><strong style="display:block;font-size:18px;" class="txt-emerald">+${roiCaixa.toFixed(1)}%</strong></div>
+        </div>
+        <div class="fin-box">
+          <div class="fin-row"><span>Entrada:</span><strong>${BRL(entrada)}</strong></div>
+          <div class="fin-row"><span>Financiado:</span><strong>${BRL(financiado)}</strong></div>
+          <div class="fin-row"><span>1ª Parcela SAC:</span><strong>${BRL(parcela1)} / mês</strong></div>
+          <div class="fin-row"><strong>Lucro Líquido:</strong><strong class="txt-emerald">${BRL(lucro)}</strong></div>
+        </div>
+      `;
+    }
+
+    function atualizarPreviewWA() {
+      const num = document.getElementById('wa-numero').value;
+      const cid = document.getElementById('wa-cidades').value;
+      document.getElementById('wa-preview').textContent =
+`🚨 *ORÁCULO DOS LEILÕES — ALERTA OURO*
+Destino: ${num} | Cidades: ${cid}
+
+🏢 *Apartamento 2Q - Zona 07 (Maringá/PR)*
+⭐ Score: *9.4 / 10* | Lance: *R$ 198.000*
+📈 ROI Líquido: *+56,4%* | 🔓 Desocupado`;
+    }
+
+    function salvarRegraWA() {
       try {
-        const r = await fetch('./imoveis.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        const d = await r.json();
-        const arr = Array.isArray(d) ? d : (d.lotes || []);
-        if (!arr.length) throw new Error('Base vazia');
-        LOTES = arr;
-        st.textContent = `Sincronizado (${LOTES.length} imóveis)`;
-      } catch (e) {
-        LOTES = DEMO;
-        st.textContent = `Modo Demo (${e.message})`;
-      }
-      montarUFs();
-      filtrar();
+        localStorage.setItem('oraculo_wa', JSON.stringify({
+          numero: document.getElementById('wa-numero').value,
+          cidades: document.getElementById('wa-cidades').value
+        }));
+      } catch {}
+      alert('Regra salva no navegador!');
     }
 
-    function lerArquivo(ev) {
-      const f = ev.target.files[0];
-      if (!f) return;
-      const rd = new FileReader();
-      rd.onload = e => {
-        const txt = e.target.result;
-        if (f.name.toLowerCase().endsWith('.csv')) {
-          LOTES = txt.split('\n').slice(4).map(linha => {
-            const c = linha.split(';').map(s => s.trim());
-            const p = parseFloat((c[5] || '0').replace(/\./g, '').replace(',', '.'));
-            const av = parseFloat((c[6] || '0').replace(/\./g, '').replace(',', '.'));
-            if (c.length < 10 || p <= 15000) return null;
-            const id13 = c[0].replace(/\D/g, '').padStart(13, '0');
-            return { id: 'CX-' + id13, titulo: (c[3] || c[2]) + ' - ' + (c[4] || ''), cidade: c[2], uf: c[1], lance2: p, avaliacao: av, score: 8.8, portal: 'Caixa', url: `https://venda-imoveis.caixa.gov.br/sistema/detalhe-imovel.asp?hdnImovel=${id13}` };
-          }).filter(Boolean);
-          document.getElementById('status').textContent = `CSV Caixa carregado (${LOTES.length} imóveis)`;
-        } else {
-          const j = JSON.parse(txt);
-          LOTES = Array.isArray(j) ? j : (j.lotes || []);
-          document.getElementById('status').textContent = `JSON carregado (${LOTES.length} imóveis)`;
-        }
-        montarUFs();
-        filtrar();
-      };
-      rd.readAsText(f, f.name.toLowerCase().endsWith('.csv') ? 'ISO-8859-1' : 'UTF-8');
-    }
-
-    iniciar();
+    window.addEventListener('DOMContentLoaded', () => {
+      carregarCustosSalvos();
+      calcularSimulador();
+      atualizarPreviewWA();
+      carregarDados();
+    });
   </script>
 </body>
 </html>
